@@ -1,0 +1,30 @@
+{
+  "name": "مدیریت سالن ناخن",
+  "short_name": "سالن ناخن",
+  "description": "مدیریت مشتری‌ها، نوبت‌ها، تقویم و یادآوری‌های سالن ناخن",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF5F2",
+  "theme_color": "#B34760",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "display_override": [
+    "standalone"
+  ]
+}
