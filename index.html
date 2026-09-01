@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#8C3349">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <title>مدیریت سالن ناخن</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap">
 <style>
@@ -1642,11 +1649,17 @@ async function deleteAppointment(id){
 }
 function copyReminder(id){
   const a = state.appointments.find(x=>x.id===id);
+  if(!a) return;
   const c = state.customers.find(c=>c.id===a.customerId);
   const msg = `سلام ${c?c.name:''} عزیز 🌸 یادآوری وقت شما در تاریخ ${formatJalali(a.date)} ساعت ${a.time} برای ${a.serviceName||'خدمت رزرو‌شده'}. منتظر دیدارتون هستیم 💅`;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(msg).then(()=>showToast('پیام کپی شد — می‌تونی توی پیامک یا واتس‌اپ بفرستی'));
-  } else { showToast(msg); }
+  const rawPhone = c && c.phone ? String(c.phone) : '';
+  const phone = rawPhone.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9+]/g,'');
+  if(!phone){
+    showToast('شماره موبایل این مشتری ثبت نشده');
+    return;
+  }
+  // Opens the phone's SMS app with the recipient and reminder text already filled in.
+  window.location.href = `sms:${phone}?body=${encodeURIComponent(msg)}`;
 }
 
 /* ============ Service form ============ */
@@ -1996,6 +2009,15 @@ document.getElementById('globalBackupFileInput').addEventListener('change', func
     if(main) main.innerHTML='<div class="loading">خطا در بارگذاری اطلاعات.<br><button class="btn" style="margin-top:12px" onclick="location.reload()">تلاش دوباره</button></div>';
   }
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.error('PWA service worker registration failed:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
