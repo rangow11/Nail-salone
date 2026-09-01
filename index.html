@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#8C3349">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<title>مدیریت سالن ناخن</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg:#FBF5F2; --card:#FFFFFF; --primary:#B34760; --primary-dark:#8C3349;
+    --gold:#C79A4B; --text:#3B2A2E; --muted:#8A7377; --border:#F0E2DF;
+    --success:#4C8C6B; --pending:#C79A4B; --danger:#B23A48;
+    --shadow: 0 4px 18px rgba(140,51,73,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  .phone{touch-action:pan-y;} .phone *{touch-action:pan-y;}
+  body{ font-family:'Vazirmatn', Tahoma, sans-serif; background: var(--bg); color: var(--text);
+    min-height:100vh; display:flex; justify-content:center; padding: 18px 10px 40px; }
+  .phone{ width:100%; max-width:430px; height:calc(100vh - 36px); min-height:680px; max-height:920px; background: var(--card); border-radius: 28px; box-shadow: var(--shadow);
+    overflow:hidden; border:1px solid var(--border); display:flex; flex-direction:column; position:relative; }
+  header.top{ background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color:#fff;
+    padding: 22px 20px 18px; }
+  header.top h1{ font-size:19px; font-weight:800; }
+  header.top p{ font-size:12.5px; opacity:.85; margin-top:3px; }
+  .swatches{ display:flex; gap:6px; margin-top:14px; }
+  .swatches span{ width:16px; height:16px; border-radius:50%; display:inline-block; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+  main{ flex:1; overflow-y:auto; padding: 16px 16px 90px; }
+  .section-title{ font-size:14.5px; font-weight:700; margin: 4px 0 10px; display:flex; align-items:center; justify-content:space-between; }
+  .muted{ color:var(--muted); font-size:13.5px; }
+  .card{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:10px; box-shadow: var(--shadow); }
+  .stat-row{ display:flex; gap:10px; margin-bottom:12px; }
+  .stat{ flex:1; background: #fff; border:1px solid var(--border); border-radius:16px; padding:12px 8px; text-align:center; }
+  .stat .num{ font-size:19px; font-weight:800; color:var(--primary-dark); }
+  .stat .lbl{ font-size:11px; color:var(--muted); margin-top:2px;}
+  .alert-card{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-radius:14px; margin-bottom:8px; cursor:pointer; border:1px solid var(--border); }
+  .alert-card.mid{ background:#FCF3E9; }
+  .alert-card.hot{ background:#FBEAEC; }
+  .alert-card .n{ font-weight:800; font-size:16px; }
+  .empty{ text-align:center; padding: 30px 10px; color:var(--muted); font-size:13px; }
+  .empty .big{ font-size:32px; margin-bottom:6px; }
+  .btn{ background: var(--primary); color:#fff; border:none; border-radius:12px; padding:10px 16px; font-family:inherit;
+    font-size:13px; font-weight:700; cursor:pointer; transition:.15s; }
+  .btn:hover{ background: var(--primary-dark); }
+  .btn.ghost{ background:transparent; color:var(--primary); border:1.5px solid var(--primary); }
+  .btn.small{ padding:6px 10px; font-size:11.5px; border-radius:9px; }
+  .fab{ position:absolute; bottom:78px; left:16px; width:50px; height:50px; border-radius:50%; background: var(--primary);
+    color:#fff; border:none; font-size:24px; box-shadow:0 6px 16px rgba(140,51,73,.35); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; z-index:5; }
+  .list-item{ display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid var(--border); gap:8px; }
+  .list-item:last-child{ border-bottom:none; }
+  .avatar{ width:36px;height:36px;border-radius:50%; background: linear-gradient(135deg, var(--gold), var(--primary));
+    color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .row{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .name{ font-size:13.5px; font-weight:700; }
+  .sub{ font-size:13px; color:var(--muted); margin-top:2px; }
+  .badge{ font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+  .badge.upcoming{ background:#FCEEE6; color: var(--gold); }
+  .badge.done{ background:#E7F3EC; color: var(--success); }
+  .badge.cancelled{ background:#F6E7E9; color: var(--danger); text-decoration:line-through; }
+  .badge.days-ok{ background:#EFF6EE; color:var(--success); }
+  .badge.days-mid{ background:#FCF3E9; color:var(--gold); }
+  .badge.days-hot{ background:#FBEAEC; color:var(--danger); }
+  input, select, textarea{ width:100%; font-family:inherit; padding:10px 12px; border:1.5px solid var(--border);
+    border-radius:10px; font-size:13px; background:#fff; color:var(--text); outline:none; }
+  input:focus, select:focus, textarea:focus{ border-color: var(--primary); }
+  label{ font-size:12px; font-weight:600; color:var(--muted); display:block; margin:10px 0 4px; }
+  .modal-overlay{ position:fixed; inset:0; background:rgba(59,42,46,.45); display:none; align-items:flex-end; justify-content:center; z-index:50; }
+  .modal-overlay.open{ display:flex; }
+  .modal{ background:#fff; width:100%; max-width:430px; border-radius:22px 22px 0 0; padding:20px 20px 26px; max-height:85vh; overflow-y:auto; }
+  .modal h3{ font-size:15.5px; margin-bottom:4px; }
+  .modal-actions{ display:flex; gap:8px; margin-top:18px; }
+  .modal-actions .btn{ flex:1; }
+  nav.bottom{ position:absolute; bottom:0; left:0; right:0; height:66px; background:#fff; border-top:1px solid var(--border); display:flex; z-index:20; }
+  nav.bottom button{ position:relative; flex:1; background:none; border:none; padding:9px 4px 11px;
+    display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted); cursor:pointer; font-family:inherit; }
+  nav.bottom button.active{ color: var(--primary); }
+  nav.bottom svg{ width:21px; height:21px; }
+  nav.bottom .tlabel{ font-size:10px; font-weight:600; }
+  .nav-dot{ position:absolute; top:6px; right:calc(50% - 17px); width:7px; height:7px; border-radius:50%; background:var(--danger); display:none; box-shadow:0 0 0 2px #fff; }
+  .nav-dot.show{ display:block; }
+  .more-item{ display:flex; align-items:center; gap:12px; padding:13px 4px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .customer-picker{position:relative;} .customer-picker-results{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;max-height:220px;overflow-y:auto;z-index:30;box-shadow:var(--shadow);display:none;} .customer-picker-results.open{display:block;} .customer-option{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;} .customer-option:last-child{border-bottom:0}.customer-option:hover{background:#FBF5F2}.backup-row{display:flex;gap:8px;margin-top:10px}.backup-row .btn{flex:1}
+  .more-item:last-child{ border-bottom:none; }
+  .more-icon{ width:38px; height:38px; border-radius:12px; background:#FCEEE6; display:flex; align-items:center; justify-content:center; color:var(--primary-dark); flex-shrink:0; }
+  .more-icon svg{ width:19px; height:19px; }
+  .more-item .desc{ font-size:13px; color:var(--muted); margin-top:2px; }
+  .more-dot{ width:8px; height:8px; border-radius:50%; background:var(--danger); flex-shrink:0; }
+  .item-dot{ width:8px; height:8px; border-radius:50%; background:var(--danger); display:inline-block; margin-left:6px; box-shadow:0 0 0 2px #fff; vertical-align:middle; }
+  .notification-center{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:12px 14px; margin-bottom:12px; box-shadow:var(--shadow); }
+  .notification-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .notification-count{background:var(--danger);color:#fff;border-radius:20px;padding:3px 8px;font-size:11px;font-weight:800;}
+  .notification-item{display:flex;align-items:center;gap:9px;padding:10px 2px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .notification-item:last-child{border-bottom:0;}
+  .notification-item .ni-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0;}
+  .system-notice-btn{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:6px 9px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;margin-top:10px;}
+  .romance-card{ background:linear-gradient(135deg,#FFF4F6,#FFF9F2); border:1px solid #F1D7DD; min-height:156px;height:156px;display:flex;flex-direction:column;justify-content:center;overflow:hidden; }
+  .romance-text{ font-size:14px; font-weight:700; line-height:2; text-align:center; color:var(--primary-dark); height:70px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 8px; }
+  .romance-actions{ display:flex; gap:8px; margin-top:10px; }
+  .romance-actions .btn{ flex:1; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background: var(--text); color:#fff;
+    padding:10px 18px; border-radius:20px; font-size:12.5px; z-index:100; opacity:0; transition:.25s; pointer-events:none; max-width:80%; text-align:center; }
+  .toast.show{ opacity:1; }
+  .offer-card{ background: linear-gradient(135deg, #FFF7F1, #FCEEE6); border:1px dashed var(--gold); }
+  .offer-card .discount{ font-size:20px; font-weight:800; color:var(--primary-dark); }
+  .del-x{ background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:2px 6px; }
+  .loading{ text-align:center; padding:60px 10px; color:var(--muted); font-size:13px; }
+  .chips{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+  .chip{ padding:6px 12px; border-radius:16px; font-size:11.5px; font-weight:700; border:1.5px solid var(--border);
+    background:#fff; color:var(--muted); cursor:pointer; }
+  .chip.active{ background: var(--primary); color:#fff; border-color:var(--primary); }
+  .datesel{ display:flex; gap:6px; }
+  .datesel select{ padding:8px 6px; font-size:12px; }
+  .financial-stat{ text-align:center; padding:14px 6px; border-radius:14px; height:82px; min-height:82px; max-height:82px; display:flex; flex-direction:column; justify-content:center; width:100%; box-sizing:border-box; overflow:hidden; }
+  .stat-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch;margin-bottom:8px}.stat-row.home-stats{grid-template-columns:repeat(3,minmax(0,1fr));}.stat-row > *{min-width:0}.financial-stat .num{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .financial-stat .num{ font-size:17px; font-weight:800; }
+  .financial-stat .lbl{ font-size:10.5px; color:var(--muted); margin-top:2px; }
+  .settings-card{ background:#FFF7F1; border:1px solid var(--gold); border-radius:14px; padding:12px 14px; margin-bottom:14px; }
+  .svc-check{ display:flex; align-items:center; justify-content:space-between; padding:9px 2px; border-bottom:1px solid var(--border); font-size:12.5px; cursor:pointer; }
+  .svc-check:last-child{ border-bottom:none; }
+  .svc-left{ display:flex; align-items:center; gap:8px; }
+  .svc-left input{ width:auto; accent-color:var(--primary); }
+  .svc-price{ color:var(--muted); font-size:11.5px; }
+  .total-row{ display:flex; justify-content:space-between; align-items:center; padding:10px 2px 2px; font-size:13px; font-weight:700; }
+  ::-webkit-scrollbar{ width:5px; height:4px; }
+  ::-webkit-scrollbar-thumb{ background: var(--border); border-radius:10px; }
+
+  .customer-owner-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap;display:inline-block;margin-top:4px}
+  .owner-me{background:#F3E8FF;color:#7C3AED;border:1px solid #E9D5FF}.owner-salon{background:#E8F7EF;color:#237A4B;border:1px solid #CDEBDA}
+  .customer-salon-row{border-right:6px solid #4C8C6B;padding-right:8px}.customer-me-row{border-right:6px solid #7C3AED;padding-right:8px}
+  .appt-finance{background:#F8F4FF;border:1px solid #E9D5FF;border-radius:12px;padding:10px 12px;margin-top:10px}.finance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.finance-box{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 5px;text-align:center}.finance-box .v{font-size:12px;font-weight:800}.finance-box .l{font-size:9.5px;color:var(--muted);margin-top:2px}
+  .qty-input{width:70px!important;padding:7px 6px!important;text-align:center}.svc-mode-badge{font-size:9.5px;padding:2px 7px;border-radius:10px;background:#F3EBEA;color:var(--muted);margin-right:5px}
+  .month-nav{display:flex;align-items:center;gap:7px;margin-bottom:10px}.month-nav .btn{padding:8px 10px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;direction:rtl}.cal-week{font-size:10px;font-weight:800;text-align:center;color:var(--muted);padding:5px 1px}.cal-day{min-height:54px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:5px;cursor:pointer;position:relative;text-align:center}.cal-day:hover{border-color:var(--primary)}.cal-day.empty{visibility:hidden;cursor:default}.cal-day.friday{background:#FFF1F3;border-color:#F3CDD5}.cal-day.holiday{background:#FDECEE;border-color:#F4C8D0}.cal-day.today{box-shadow:inset 0 0 0 2px var(--primary)}.cal-day .dn{font-size:12px;font-weight:800}.cal-day .holiday-mark{font-size:8px;color:var(--danger);margin-top:2px}.cal-day .appt-count{position:absolute;right:4px;bottom:4px;background:var(--primary);color:#fff;border-radius:10px;font-size:8px;min-width:16px;padding:2px 3px}.calendar-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--muted)}.legend-item{display:flex;align-items:center;gap:4px}.legend-dot{width:9px;height:9px;border-radius:3px;display:inline-block}.appt-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.report-mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}.report-visits-only{grid-template-columns:1fr}.report-visits-only .report-mini{min-height:68px}.report-mini-grid > .report-mini{min-width:0;min-height:72px;display:flex;flex-direction:column;justify-content:center}.report-mini{border:1px solid var(--border);border-radius:13px;padding:10px;text-align:center;background:#fff}.report-customer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:12px}.report-customer-grid .report-mini{min-height:68px;display:flex;flex-direction:column;justify-content:center}.report-customer-grid .report-mini .num{font-size:15px;font-weight:800;color:var(--primary-dark)}.report-finance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}.report-finance-card{height:82px;min-height:82px;border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:hidden}.report-finance-card .num{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.report-finance-card .lbl{font-size:10.5px;color:var(--muted);margin-top:2px}.report-finance-wide{width:100%;margin-bottom:8px}.report-finance-profit{width:100%;height:92px;min-height:92px;margin-bottom:14px}.report-finance-profit .num{font-size:19px}.report-mini .num{font-size:15px;font-weight:800;color:var(--primary-dark)}.report-mini .lbl{font-size:10px;color:var(--muted);margin-top:3px}.swipe-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:5px}.tab-stage{position:relative;width:100%;height:100%;overflow:hidden;touch-action:none}.tab-pane{position:absolute;inset:0;width:100%;height:100%;overflow-y:auto;padding:16px 16px 90px;background:#fff;will-change:transform}.tab-pane::-webkit-scrollbar{width:5px}.tab-pane.animating{transition:transform .42s cubic-bezier(.22,.61,.36,1)}
+
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <header class="top">
+    <h1>سالن ناخن</h1>
+    <p>مدیریت مشتری‌ها، نوبت‌ها و امور مالی · نسخه <span id="appVersionLabel"></span></p>
+    <button class="system-notice-btn" id="enableNotificationsBtn" onclick="requestSystemNotifications()">🔔 فعال‌سازی اعلان‌های گوشی</button>
+    <div class="swatches">
+      <span style="background:#B34760"></span><span style="background:#C79A4B"></span>
+      <span style="background:#E8A0AE"></span><span style="background:#4C8C6B"></span><span style="background:#8C3349"></span>
+    </div>
+  </header>
+
+  <main id="main"><div class="loading">در حال بارگذاری...</div></main>
+
+  <button class="fab" id="fabBtn" title="افزودن">＋</button>
+
+  <nav class="bottom" id="bottomNav">
+    <button data-tab="home" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span class="nav-dot" id="dot_home"></span>
+      <span class="tlabel">خانه</span>
+    </button>
+    <button data-tab="customers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <span class="nav-dot" id="dot_customers"></span>
+      <span class="tlabel">مشتری‌ها</span>
+    </button>
+    <button data-tab="appointments">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <span class="nav-dot" id="dot_appointments"></span>
+      <span class="tlabel">نوبت‌ها</span>
+    </button>
+    <button data-tab="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7 14h3M14 14h3M7 17h3M14 17h3"/></svg><span class="nav-dot" id="dot_calendar"></span><span class="tlabel">تقویم</span></button>
+    <button data-tab="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      <span class="nav-dot" id="dot_more"></span>
+      <span class="tlabel">سایر</span>
+    </button>
+  </nav>
+</div>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalBody"></div></div>
+<div class="toast" id="toast"></div>
+<input id="globalBackupFileInput" type="file" accept="application/json,.json" style="display:none">
+
+<script>
+/* ============ Jalali (Persian) calendar conversion ============ */
+function jdiv(a,b){ return ~~(a/b); }
+function jmod(a,b){ return a - ~~(a/b)*b; }
+function jalCal(jy){
+  var breaks=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+  var bl=breaks.length, gy=jy+621, leapJ=-14, jp=breaks[0], jm,jump,leap,n,i,leapG,march;
+  for(i=1;i<bl;i+=1){ jm=breaks[i]; jump=jm-jp; if(jy<jm) break;
+    leapJ=leapJ+jdiv(jump,33)*8+jdiv(jmod(jump,33),4); jp=jm; }
+  n=jy-jp; leapJ=leapJ+jdiv(n,33)*8+jdiv(jmod(n,33)+3,4);
+  if(jmod(jump,33)===4 && jump-n===4) leapJ+=1;
+  leapG=jdiv(gy,4)-jdiv((jdiv(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(jump-n<6) n=n-jump+jdiv(jump+4,33)*33;
+  leap=jmod(jmod(n+1,33)-1,4); if(leap===-1) leap=4;
+  return {leap:leap, gy:gy, march:march};
+}
+function isLeapJalaaliYear(jy){ return jalCal(jy).leap===0; }
+function g2d(gy,gm,gd){
+  var d=jdiv((gy+jdiv(gm-8,6)+100100)*1461,4)+jdiv(153*jmod(gm+9,12)+2,5)+gd-34840408;
+  d=d-jdiv(jdiv(gy+100100+jdiv(gm-8,6),100)*3,4)+752; return d;
+}
+function d2g(jdn){
+  var j,i,gd,gm,gy;
+  j=4*jdn+139361631;
+  j=j+jdiv(jdiv(4*jdn+183187720,146097)*3,4)*4-3908;
+  i=jdiv(jmod(j,1461),4)*5+308;
+  gd=jdiv(jmod(i,153),5)+1;
+  gm=jmod(jdiv(i,153),12)+1;
+  gy=jdiv(j,1461)-100100+jdiv(8-gm,6);
+  return [gy,gm,gd];
+}
+function j2d(jy,jm,jd){ var r=jalCal(jy); return g2d(r.gy,3,r.march)+(jm-1)*31-jdiv(jm,7)*(jm-7)+jd-1; }
+function d2j(jdn){
+  var gy=d2g(jdn)[0], jy=gy-621, r,jdn1f,k,jm,jd;
+  r=jalCal(jy); jdn1f=g2d(gy,3,r.march); k=jdn-jdn1f;
+  if(k>=0){ if(k<=185){ jm=1+jdiv(k,31); jd=jmod(k,31)+1; return [jy,jm,jd]; } else { k-=186; } }
+  else { jy-=1; k+=179; if(r.leap===1) k+=1; }
+  jm=7+jdiv(k,30); jd=jmod(k,30)+1; return [jy,jm,jd];
+}
+function toJalaali(gy,gm,gd){ return d2j(g2d(gy,gm,gd)); }
+function toGregorian(jy,jm,jd){ return d2g(j2d(jy,jm,jd)); }
+function daysInJalaaliMonth(jy,jm){ if(jm<=6) return 31; if(jm<=11) return 30; return isLeapJalaaliYear(jy)?30:29; }
+
+const FA_MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const FA_WEEKDAYS = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+function toFa(n){ return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+function isoFromParts(gy,gm,gd){ return gy+'-'+pad2(gm)+'-'+pad2(gd); }
+function partsFromIso(iso){ const [y,m,d]=iso.split('-').map(Number); return [y,m,d]; }
+function isoToJalali(iso){ const [y,m,d]=partsFromIso(iso); return toJalaali(y,m,d); }
+function todayIso(){ const d=new Date(); return isoFromParts(d.getFullYear(), d.getMonth()+1, d.getDate()); }
+function todayJalali(){ return isoToJalali(todayIso()); }
+
+function formatJalali(iso, withWeekday){
+  if(!iso) return '';
+  const [jy,jm,jd] = isoToJalali(iso);
+  const [gy,gm,gd] = partsFromIso(iso);
+  const wd = FA_WEEKDAYS[new Date(gy,gm-1,gd).getDay()];
+  let s = toFa(jd) + ' ' + FA_MONTHS[jm-1] + ' ' + toFa(jy);
+  if(withWeekday) s = wd + '، ' + s;
+  return s;
+}
+function formatJalaliShort(iso){
+  if(!iso) return '';
+  const [jy,jm,jd] = isoToJalali(iso);
+  return toFa(jd) + ' ' + FA_MONTHS[jm-1] + ' ' + toFa(String(jy).slice(2));
+}
+function daysBetween(iso1, iso2){
+  const d1 = new Date(iso1+'T00:00:00'), d2 = new Date(iso2+'T00:00:00');
+  return Math.round((d2-d1)/86400000);
+}
+
+/* Jalali date-select widget (day/month/year selects) */
+function jalaliDateSelectsHtml(prefix, iso, yearsBack, yearsForward){
+  yearsBack = yearsBack===undefined ? 3 : yearsBack;
+  yearsForward = yearsForward===undefined ? 1 : yearsForward;
+  const [jy,jm,jd] = iso ? isoToJalali(iso) : todayJalali();
+  const curY = todayJalali()[0];
+  let yearOpts = '';
+  for(let y=curY-yearsBack; y<=curY+yearsForward; y++) yearOpts += `<option value="${y}" ${y===jy?'selected':''}>${toFa(y)}</option>`;
+  let monthOpts = FA_MONTHS.map((n,i)=> `<option value="${i+1}" ${i+1===jm?'selected':''}>${n}</option>`).join('');
+  const dim = daysInJalaaliMonth(jy,jm);
+  let dayOpts = '';
+  for(let d=1; d<=dim; d++) dayOpts += `<option value="${d}" ${d===jd?'selected':''}>${toFa(d)}</option>`;
+  return `<div class="datesel">
+    <select id="${prefix}_d">${dayOpts}</select>
+    <select id="${prefix}_m">${monthOpts}</select>
+    <select id="${prefix}_y">${yearOpts}</select>
+  </div>`;
+}
+function getIsoFromJalaliSelects(prefix){
+  const d = Number(document.getElementById(prefix+'_d').value);
+  const m = Number(document.getElementById(prefix+'_m').value);
+  const y = Number(document.getElementById(prefix+'_y').value);
+  const [gy,gm,gd] = toGregorian(y,m,d);
+  return isoFromParts(gy,gm,gd);
+}
+
+/* Month/day-only pickers for recurring occasions (no year) */
+const G_MONTHS = ['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
+function monthDaySelectHtml(prefix, type, month, day){
+  const names = type==='gregorian' ? G_MONTHS : FA_MONTHS;
+  const m = month||1, d = day||1;
+  let monthOpts = names.map((n,i)=>`<option value="${i+1}" ${i+1===m?'selected':''}>${n}</option>`).join('');
+  let dayOpts = '';
+  for(let dd=1; dd<=31; dd++) dayOpts += `<option value="${dd}" ${dd===d?'selected':''}>${type==='gregorian'?dd:toFa(dd)}</option>`;
+  return `<div class="datesel"><select id="${prefix}_d">${dayOpts}</select><select id="${prefix}_m">${monthOpts}</select></div>`;
+}
+
+/* Birthday countdown */
+function daysUntilNextBirthday(birthIso){
+  if(!birthIso) return null;
+  const [,bm,bd] = isoToJalali(birthIso);
+  const [ty,tm,td] = todayJalali();
+  let targetY = ty;
+  if(tm>bm || (tm===bm && td>bd)) targetY = ty+1;
+  const dim = daysInJalaaliMonth(targetY, bm);
+  const day = Math.min(bd, dim);
+  const [gy,gm,gd] = toGregorian(targetY, bm, day);
+  return daysBetween(todayIso(), isoFromParts(gy,gm,gd));
+}
+function ageFromBirth(birthIso){
+  if(!birthIso) return null;
+  const [by] = isoToJalali(birthIso);
+  const [ty] = todayJalali();
+  return ty - by;
+}
+
+/* Occasions: next occurrence + job matching */
+function nextOccasionDate(occ){
+  const t = todayIso();
+  if(occ.type==='jalali'){
+    const [ty] = todayJalali();
+    for(let y=ty; y<=ty+1; y++){
+      const dim = daysInJalaaliMonth(y, occ.month);
+      const day = Math.min(occ.day, dim);
+      const [gy,gm,gd] = toGregorian(y, occ.month, day);
+      const iso = isoFromParts(gy,gm,gd);
+      if(iso >= t) return iso;
+    }
+  } else {
+    const [gyToday] = partsFromIso(t);
+    for(let y=gyToday; y<=gyToday+1; y++){
+      const iso = isoFromParts(y, occ.month, occ.day);
+      if(iso >= t) return iso;
+    }
+  }
+  return null;
+}
+function matchedCustomersForOccasion(occ){
+  if(!occ.jobKeywords || occ.jobKeywords.length===0) return [];
+  return state.customers.filter(c=> c.job && occ.jobKeywords.some(k=>c.job.includes(k)));
+}
+function upcomingBirthdays(withinDays){
+  return state.customers.filter(c=>c.birthDate)
+    .map(c=>({c, days: daysUntilNextBirthday(c.birthDate)}))
+    .filter(x=>x.days!==null && x.days<=withinDays)
+    .sort((a,b)=>a.days-b.days);
+}
+function upcomingOccasions(withinDays){
+  return state.occasions.map(o=>({o, next: nextOccasionDate(o)}))
+    .filter(x=>x.next)
+    .map(x=>({o:x.o, next:x.next, days: daysBetween(todayIso(), x.next)}))
+    .filter(x=>x.days<=withinDays)
+    .sort((a,b)=>a.days-b.days);
+}
+
+const BUILTIN_OCCASIONS = [
+  {title:'نوروز', type:'jalali', month:1, day:1},
+  {title:'سیزده‌به‌در (روز طبیعت)', type:'jalali', month:1, day:13},
+  {title:'روز جمهوری اسلامی', type:'jalali', month:1, day:12},
+  {title:'روز معلم', type:'jalali', month:2, day:12, jobKeywords:['معلم','آموزگار','دبیر']},
+  {title:'روز پزشک', type:'jalali', month:6, day:1, jobKeywords:['پزشک','دکتر']},
+  {title:'روز خبرنگار', type:'jalali', month:5, day:8, jobKeywords:['خبرنگار','روزنامه‌نگار']},
+  {title:'روز دانشجو', type:'jalali', month:9, day:16, jobKeywords:['دانشجو']},
+  {title:'روز مهندس', type:'jalali', month:12, day:5, jobKeywords:['مهندس']},
+  {title:'روز جهانی کارگر', type:'gregorian', month:5, day:1, jobKeywords:['کارگر']},
+  {title:'روز جهانی پرستار', type:'gregorian', month:5, day:12, jobKeywords:['پرستار']},
+  {title:'روز جهانی زن', type:'gregorian', month:3, day:8},
+  {title:'روز ولنتاین', type:'gregorian', month:2, day:14},
+  {title:'سال نو میلادی', type:'gregorian', month:1, day:1},
+  {title:'کریسمس', type:'gregorian', month:12, day:25},
+  {title:'هالووین', type:'gregorian', month:10, day:31},
+];
+
+/* ============ App state ============ */
+const APP_VERSION = '3.7.0';
+function roundMoney(n){ const x=Number(n)||0; return Math.round(x/1000)*1000; }
+function customerType(c){ return c && c.ownerType==='salon' ? 'salon' : 'me'; }
+function ownerLabel(c){ return customerType(c)==='salon' ? 'مشتری سالن' : 'مشتری خودم'; }
+function ownerClass(c){ return customerType(c)==='salon' ? 'owner-salon' : 'owner-me'; }
+function apptFinance(a){ const total=roundMoney(a&&a.price||0); const pct=Math.max(0,Math.min(100,Number(a&&a.salonPercent)||30)); const salon=customerType(a&&state.customers.find(c=>c.id===a.customerId))==='salon'?roundMoney(total*pct/100):0; return {total,salon,me:roundMoney(total-salon),pct}; }
+function firstVisitIso(customerId){ const v=state.appointments.filter(a=>a.customerId===customerId&&a.status==='done').sort((a,b)=>a.date.localeCompare(b.date)); return v.length?v[0].date:null; }
+function isNewCustomerInMonth(customerId,jy,jm){ const d=firstVisitIso(customerId); if(!d)return false; const [y,m]=isoToJalali(d); return y===jy&&m===jm; }
+const OFFICIAL_EVENTS={
+  1405:{
+    '1/1':'عید سعید فطر + نوروز','1/2':'عید سعید فطر + نوروز','1/3':'نوروز','1/4':'نوروز',
+    '1/12':'روز جمهوری اسلامی ایران','1/13':'روز طبیعت','1/25':'شهادت امام جعفر صادق (ع)',
+    '3/6':'عید سعید قربان','3/14':'عید غدیر خم + رحلت امام خمینی (ره)','3/15':'قیام ۱۵ خرداد',
+    '4/3':'تاسوعای حسینی','4/4':'عاشورای حسینی',
+    '5/13':'اربعین حسینی','5/21':'رحلت پیامبر اکرم (ص) + شهادت امام حسن مجتبی (ع)','5/22':'شهادت امام رضا (ع)','5/30':'شهادت امام حسن عسکری (ع) + آغاز امامت حضرت ولیعصر (عج)',
+    '6/8':'ولادت حضرت رسول اکرم (ص) + ولادت امام جعفر صادق (ع)',
+    '8/22':'شهادت حضرت فاطمه زهرا (س)',
+    '10/2':'ولادت امام علی (ع) + روز پدر','10/16':'مبعث حضرت رسول اکرم (ص)',
+    '11/4':'ولادت حضرت قائم (عج) + نیمه شعبان','11/22':'پیروزی انقلاب اسلامی ایران',
+    '12/9':'شهادت حضرت علی (ع)','12/19':'عید سعید فطر','12/20':'تعطیل به مناسبت عید سعید فطر','12/29':'روز ملی شدن صنعت نفت ایران'
+  }
+};
+function holidayInfo(jy,jm,jd){ const y=OFFICIAL_EVENTS[jy]; return y ? (y[jm+'/'+jd]||'') : ''; }
+function monthMove(y,m,delta){ let n=m+delta,yy=y;while(n<1){n+=12;yy--;}while(n>12){n-=12;yy++;}return [yy,n]; }
+const INITIAL_BACKUP_DATA = {"customers":[{"id":"mtcupur4a3yqk","name":"هلیا","phone":"09184960189","job":"روان شناس","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcuqvhdpid9e","name":"نگین الوندی","phone":"09184957864","job":"خانه‌دار","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcus2tv99ihr","name":"فائزه مصداقی","phone":"09397621347","job":"معلم","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcuso1bj25sn","name":"مامان سپیده","phone":"","job":"معلم","notes":"مامان سپیده","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcutoz924apm","name":"آرزو","phone":"09991588285","job":"هنرمند","notes":"","referrerId":null,"birthDate":"1999-08-02","createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcuzbdz1sfau","name":"حدیث اسدی","phone":"09363199930","job":"فروشنده","notes":"دختردایی فاطمه","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcv04dghrpw2","name":"معصومه حاصلی","phone":"","job":"","notes":"مامان نگین","referrerId":"mtcuqvhdpid9e","birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcv0szn0vg73","name":"خانم توکلی","phone":"","job":"خانه‌دار","notes":"مشتری سالن","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"salon"},{"id":"mtcwntju7bgit","name":"خانم محمدی","phone":"","job":"آشپز","notes":"مشتری سالن\nعروسی پسرش بود","referrerId":"mtcv0szn0vg73","birthDate":null,"createdAt":"2026-08-28","ownerType":"salon"},{"id":"mtcwqi5q6o7r5","name":"زهرا زارعی","phone":"","job":"منشی","notes":"مشتری سالن\nدختر خانم محمدی","referrerId":"mtcv0szn0vg73","birthDate":null,"createdAt":"2026-08-28","ownerType":"salon"},{"id":"mtcwta6engbgs","name":"پریسا احمدی","phone":"09185051522","job":"مهندس معمار","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcwuqqclto56","name":"نفیسه رحمانی","phone":"09188095226","job":"مهندس معمار","notes":"","referrerId":"mtcwta6engbgs","birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcwzr9d1essm","name":"فاطمه فاضلی","phone":"09910793958","job":"فروشنده","notes":"دخترعمه حدیث","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcx17fg82u1w","name":"لیلا قلیجی","phone":"09185092083","job":"مهندس بهداشت","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcx2fo7vjv3q","name":"غزل رنجبران","phone":"09182110153","job":"خیاط","notes":"","referrerId":"mtcuqvhdpid9e","birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcx2ry4j2b3f","name":"مامان غزل","phone":"","job":"","notes":"","referrerId":"mtcx2fo7vjv3q","birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcx3nannabjk","name":"کمند عزیزی","phone":"09233273513","job":"معلم زبان","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcx4n4z9kxwx","name":"ستاره مشایخی","phone":"09126475524","job":"کارمند","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtcx4ys0osvu9","name":"خاله غزل","phone":"","job":"","notes":"","referrerId":"mtcx2fo7vjv3q","birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtd69ag798arc","name":"شهره اعتماد","phone":"","job":"","notes":"مامان نگار غفاری","referrerId":null,"birthDate":null,"createdAt":"2026-08-28","ownerType":"me"},{"id":"mtd7bco7e9fos","name":"مامان زهرا","phone":"09028591486","job":"حسابدار","notes":"","referrerId":null,"birthDate":"1971-09-11","createdAt":"2026-08-28","ownerType":"me"},{"id":"mteai54o2zweg","name":"مریم محمدی","phone":"09186810358","job":"","notes":"مشتری سالن","referrerId":null,"birthDate":null,"createdAt":"2026-08-29","ownerType":"salon"},{"id":"mtetrh8xoqb5d","name":"نفیسه عظیمی","phone":"09188087281","job":"خانه‌دار","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-29","ownerType":"me"},{"id":"mtetsi2760aa5","name":"خواهر نفیسه عظیمی","phone":"","job":"","notes":"خواهر نفیسه","referrerId":"mtetrh8xoqb5d","birthDate":null,"createdAt":"2026-08-29","ownerType":"me"},{"id":"mtfyhai0pmsw9","name":"عاطی سروی","phone":"09108000493","job":"خانه‌دار","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-30","ownerType":"me"},{"id":"mtfyiw908ek91","name":"زهرا هواسی","phone":"09919681687","job":"دانشجو","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-30","ownerType":"me"},{"id":"mtfyjw2gmrkn5","name":"فرشته هواسی","phone":"","job":"پرستار","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-30","ownerType":"me"},{"id":"mtfykd4gzehij","name":"هدا هواسی","phone":"","job":"","notes":"","referrerId":null,"birthDate":null,"createdAt":"2026-08-30","ownerType":"me"}],"services":[{"id":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"pricingMode":"total"},{"id":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"pricingMode":"total"},{"id":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"pricingMode":"total"},{"id":"mtcumcn58h07j","name":"ژلپولیش ساده","price":550000,"pricingMode":"total"},{"id":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"pricingMode":"total"},{"id":"mtcun1x9vj9qw","name":"مانیکور","price":300000,"pricingMode":"total"},{"id":"mtcun94zhrrab","name":"ریموو","price":250000,"pricingMode":"total"},{"id":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"pricingMode":"total"},{"id":"mtcunzjppy1u3","name":"طراحی","price":20000,"pricingMode":"quantity"},{"id":"mtcuob1059pup","name":"فرنچ","price":130000,"pricingMode":"total"}],"appointments":[{"id":"mtcuulkj5myfl","customerId":"mtcus2tv99ihr","customerName":"فائزه مصداقی","services":[{"serviceId":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000}],"serviceName":"ژلپولیش حجیم","date":"2026-08-28","time":"09:00","price":900000,"status":"done","salonPercent":0},{"id":"mtcuv4qklaaas","customerId":"mtcuso1bj25sn","customerName":"مامان سپیده","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ترمیم ناخن، لاکژل روی مواد، ناخن شکسته، طراحی","date":"2026-08-29","time":"09:00","price":850000,"status":"done","salonPercent":0},{"id":"mtcuvjn73rznj","customerId":"mtcupur4a3yqk","customerName":"هلیا","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000}],"serviceName":"کاشت ناخن","date":"2026-08-27","time":"08:00","price":950000,"status":"done","salonPercent":0},{"id":"mtcuxhvve74yr","customerId":"mtcuqvhdpid9e","customerName":"نگین الوندی","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"کاشت ناخن، لاکژل روی مواد","date":"2026-08-27","time":"11:00","price":1215000,"status":"done","salonPercent":0},{"id":"mtd5u1xvgv5fy","customerId":"mtcx4ys0osvu9","customerName":"خاله غزل","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000}],"serviceName":"کاشت ناخن","date":"2026-08-23","time":"14:00","price":950000,"status":"done","salonPercent":0},{"id":"mtd5vq0ba2oi3","customerId":"mtcx4n4z9kxwx","customerName":"ستاره مشایخی","services":[{"serviceId":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ژلپولیش حجیم، ناخن شکسته، طراحی","date":"2026-08-23","time":"17:00","price":780000,"status":"done","salonPercent":0},{"id":"mtd5xo8oqqcgd","customerId":"mtcx3nannabjk","customerName":"کمند عزیزی","services":[{"serviceId":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ژلپولیش حجیم، لاکژل روی مواد، ناخن شکسته، طراحی","date":"2026-08-24","time":"09:00","price":850000,"status":"done","salonPercent":0},{"id":"mtd5yzou7a2w8","customerId":"mtcx2ry4j2b3f","customerName":"مامان غزل","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000}],"serviceName":"کاشت ناخن، ناخن شکسته","date":"2026-08-24","time":"12:00","price":980000,"status":"upcoming","salonPercent":0},{"id":"mtd5zrvgx4ddm","customerId":"mtcx2fo7vjv3q","customerName":"غزل رنجبران","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"ترمیم ناخن، لاکژل روی مواد","date":"2026-08-24","time":"15:00","price":800000,"status":"upcoming","salonPercent":0},{"id":"mtd60w0tnc8cx","customerId":"mtcwta6engbgs","customerName":"پریسا احمدی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"ترمیم ناخن، لاکژل روی مواد","date":"2026-08-25","time":"09:00","price":800000,"status":"done","salonPercent":0},{"id":"mtd61g4e92bg1","customerId":"mtcwuqqclto56","customerName":"نفیسه رحمانی","services":[{"serviceId":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000}],"serviceName":"ژلپولیش حجیم، ناخن شکسته","date":"2026-08-25","time":"11:00","price":730000,"status":"done","salonPercent":0},{"id":"mtd64dmhfiz3j","customerId":"mtcwzr9d1essm","customerName":"فاطمه فاضلی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ترمیم ناخن، ناخن شکسته، طراحی","date":"2026-08-25","time":"14:00","price":750000,"status":"done","salonPercent":0},{"id":"mtd65hs7zzhzu","customerId":"mtcx17fg82u1w","customerName":"لیلا قلیجی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ترمیم ناخن، ناخن شکسته، طراحی","date":"2026-08-25","time":"16:00","price":750000,"status":"done","salonPercent":0},{"id":"mtd6a2klc0mvz","customerId":"mtd69ag798arc","customerName":"شهره اعتماد","services":[{"serviceId":"mtcun1x9vj9qw","name":"مانیکور","price":300000,"unitMode":"total","quantity":1,"unitPrice":300000,"total":300000}],"serviceName":"مانیکور","date":"2026-08-25","time":"13:30","price":280000,"status":"done","salonPercent":0},{"id":"mtd6dapo5uyj7","customerId":"mtcv04dghrpw2","customerName":"معصومه حاصلی","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"کاشت ناخن، لاکژل روی مواد","date":"2026-08-26","time":"09:00","price":1050000,"status":"done","salonPercent":0},{"id":"mtd6ezsl5q1hz","customerId":"mtcuzbdz1sfau","customerName":"حدیث اسدی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ترمیم ناخن، ناخن شکسته، طراحی","date":"2026-08-26","time":"11:30","price":750000,"status":"done","salonPercent":0},{"id":"mtd6fq7v3qxd0","customerId":"mtcv0szn0vg73","customerName":"خانم توکلی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"ترمیم ناخن، لاکژل روی مواد","date":"2026-08-26","time":"14:00","price":800000,"status":"done","salonPercent":30},{"id":"mtd6gu951skck","customerId":"mtcwqi5q6o7r5","customerName":"زهرا زارعی","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000}],"serviceName":"کاشت ناخن، ناخن شکسته","date":"2026-08-26","time":"16:00","price":980000,"status":"done","salonPercent":30},{"id":"mtd6isngy94g5","customerId":"mtcwntju7bgit","customerName":"خانم محمدی","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"کاشت ناخن، لاکژل روی مواد","date":"2026-08-26","time":"18:30","price":1050000,"status":"done","salonPercent":30},{"id":"mtd7bufvt7a2c","customerId":"mtd7bco7e9fos","customerName":"مامان زهرا","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000}],"serviceName":"ترمیم ناخن","date":"2026-08-29","time":"11:00","price":700000,"status":"done","salonPercent":0},{"id":"mteaiph8hrv5y","customerId":"mteai54o2zweg","customerName":"مریم محمدی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcumn17lrg4j","name":"لاکژل روی مواد","price":100000,"unitMode":"total","quantity":1,"unitPrice":100000,"total":100000}],"serviceName":"ترمیم ناخن، لاکژل روی مواد","date":"2026-08-30","time":"10:30","price":800000,"status":"done","salonPercent":30},{"id":"mtetrxvnq1ph1","customerId":"mtetrh8xoqb5d","customerName":"نفیسه عظیمی","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000}],"serviceName":"ترمیم ناخن","date":"2026-09-01","time":"15:00","price":700000,"status":"upcoming","salonPercent":0},{"id":"mtetsx6obrqqe","customerId":"mtetsi2760aa5","customerName":"خواهر نفیسه عظیمی","services":[{"serviceId":"mtcuibq15ps2y","name":"کاشت ناخن","price":950000,"unitMode":"total","quantity":1,"unitPrice":950000,"total":950000}],"serviceName":"کاشت ناخن","date":"2026-09-01","time":"17:00","price":950000,"status":"upcoming","salonPercent":0},{"id":"mtfyhmgmyn6xc","customerId":"mtfyhai0pmsw9","customerName":"عاطی سروی","services":[{"serviceId":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000}],"serviceName":"ژلپولیش حجیم","date":"2026-09-02","time":"11:00","price":700000,"status":"upcoming","salonPercent":0},{"id":"mtfyjcvhsubr8","customerId":"mtfyiw908ek91","customerName":"زهرا هواسی","services":[{"serviceId":"mtculxrvesm1g","name":"ژلپولیش حجیم","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000},{"serviceId":"mtcunzjppy1u3","name":"طراحی","price":20000,"unitMode":"quantity","quantity":1,"unitPrice":20000,"total":20000}],"serviceName":"ژلپولیش حجیم، ناخن شکسته، طراحی","date":"2026-08-30","time":"09:00","price":750000,"status":"done","salonPercent":0},{"id":"mtfyk602dbbwq","customerId":"mtfyjw2gmrkn5","customerName":"فرشته هواسی","services":[{"serviceId":"mtcumcn58h07j","name":"ژلپولیش ساده","price":550000,"unitMode":"total","quantity":1,"unitPrice":550000,"total":550000}],"serviceName":"ژلپولیش ساده","date":"2026-08-30","time":"08:00","price":550000,"status":"done","salonPercent":0},{"id":"mtfykrez84ox1","customerId":"mtfykd4gzehij","customerName":"هدا هواسی","services":[{"serviceId":"mtcumcn58h07j","name":"ژلپولیش ساده","price":550000,"unitMode":"total","quantity":1,"unitPrice":550000,"total":550000},{"serviceId":"mtcunn42duyha","name":"ناخن شکسته","price":30000,"unitMode":"total","quantity":1,"unitPrice":30000,"total":30000}],"serviceName":"ژلپولیش ساده، ناخن شکسته","date":"2026-08-30","time":"10:00","price":580000,"status":"done","salonPercent":0},{"id":"mtg4ic14uw28d","customerId":"mtcutoz924apm","customerName":"آرزو","services":[{"serviceId":"mtcuibq1eqogc","name":"ترمیم ناخن","price":700000,"unitMode":"total","quantity":1,"unitPrice":700000,"total":700000}],"serviceName":"ترمیم ناخن","date":"2026-09-02","time":"13:00","price":700000,"status":"upcoming","salonPercent":0}],"occasions":[{"id":"mtcuibq0o7rla","builtin":true,"smsTemplate":"","title":"نوروز","type":"jalali","month":1,"day":1},{"id":"mtcuibq09fkg5","builtin":true,"smsTemplate":"","title":"سیزده‌به‌در (روز طبیعت)","type":"jalali","month":1,"day":13},{"id":"mtcuibq0inqey","builtin":true,"smsTemplate":"","title":"روز جمهوری اسلامی","type":"jalali","month":1,"day":12},{"id":"mtcuibq09o50d","builtin":true,"smsTemplate":"","title":"روز معلم","type":"jalali","month":2,"day":12,"jobKeywords":["معلم","آموزگار","دبیر"]},{"id":"mtcuibq0wqc7v","builtin":true,"smsTemplate":"","title":"روز پزشک","type":"jalali","month":6,"day":1,"jobKeywords":["پزشک","دکتر"]},{"id":"mtcuibq0is2n3","builtin":true,"smsTemplate":"","title":"روز خبرنگار","type":"jalali","month":5,"day":8,"jobKeywords":["خبرنگار","روزنامه‌نگار"]},{"id":"mtcuibq088uoh","builtin":true,"smsTemplate":"","title":"روز دانشجو","type":"jalali","month":9,"day":16,"jobKeywords":["دانشجو"]},{"id":"mtcuibq0xde9f","builtin":true,"smsTemplate":"","title":"روز مهندس","type":"jalali","month":12,"day":5,"jobKeywords":["مهندس"]},{"id":"mtcuibq00z400","builtin":true,"smsTemplate":"","title":"روز جهانی کارگر","type":"gregorian","month":5,"day":1,"jobKeywords":["کارگر"]},{"id":"mtcuibq0kp86l","builtin":true,"smsTemplate":"","title":"روز جهانی پرستار","type":"gregorian","month":5,"day":12,"jobKeywords":["پرستار"]},{"id":"mtcuibq0znnb9","builtin":true,"smsTemplate":"","title":"روز جهانی زن","type":"gregorian","month":3,"day":8},{"id":"mtcuibq0za9g7","builtin":true,"smsTemplate":"","title":"روز ولنتاین","type":"gregorian","month":2,"day":14},{"id":"mtcuibq0eaz08","builtin":true,"smsTemplate":"","title":"سال نو میلادی","type":"gregorian","month":1,"day":1},{"id":"mtcuibq0mih8f","builtin":true,"smsTemplate":"","title":"کریسمس","type":"gregorian","month":12,"day":25},{"id":"mtcuibq0518mz","builtin":true,"smsTemplate":"","title":"هالووین","type":"gregorian","month":10,"day":31}],"lastTab":"more","romanceIndex":53,"notifications":[{"id":"appointment:mtcuv4qklaaas:2026-08-29 09:00","type":"appointment","tab":"calendar","title":"نوبت مامان سپیده نزدیک است","text":"۷ شهریور ۰۵ · 09:00 · ترمیم ناخن · ۱۳ ساعت تا نوبت مانده","actionId":"mtcuv4qklaaas","read":false,"createdAt":"2026-08-28T11:15:32.925Z"},{"id":"birthday:mtcutoz924apm:mtcutoz924apm:2026-09-02","type":"birthday","tab":"home","title":"تولد آرزو نزدیک است","text":"۵ روز تا تولد 🎂","actionId":"mtcutoz924apm","read":false,"createdAt":"2026-08-28T17:01:50.644Z"},{"id":"appointment:mtd7bufvt7a2c:2026-08-29 11:00","type":"appointment","tab":"calendar","title":"نوبت مامان زهرا نزدیک است","text":"۷ شهریور ۰۵ · 11:00 · ترمیم ناخن · ۱۲ ساعت تا نوبت مانده","actionId":"mtd7bufvt7a2c","read":false,"createdAt":"2026-08-28T17:04:28.124Z"},{"id":"appointment:mteaiph8hrv5y:2026-08-30 10:30","type":"appointment","tab":"calendar","title":"نوبت مریم محمدی نزدیک است","text":"۸ شهریور ۰۵ · 10:30 · ترمیم ناخن · ۱۱ ساعت تا نوبت مانده","actionId":"mteaiph8hrv5y","read":false,"createdAt":"2026-08-29T11:21:33.312Z"},{"id":"offer:mtcuqvhdpid9e:10","type":"offer","tab":"offers","title":"نگین الوندی واجد تخفیف شده","text":"۱۰٪ تخفیف معرفی","actionId":"mtcuqvhdpid9e","read":false,"createdAt":"2026-08-29T16:23:35.443Z"},{"id":"offer:mtcv0szn0vg73:10","type":"offer","tab":"offers","title":"خانم توکلی واجد تخفیف شده","text":"۱۰٪ تخفیف معرفی","actionId":"mtcv0szn0vg73","read":false,"createdAt":"2026-08-29T16:23:35.447Z"},{"id":"offer:mtcx2fo7vjv3q:10","type":"offer","tab":"offers","title":"غزل رنجبران واجد تخفیف شده","text":"۱۰٪ تخفیف معرفی","actionId":"mtcx2fo7vjv3q","read":false,"createdAt":"2026-08-29T16:23:35.447Z"},{"id":"offer:mtcuqvhdpid9e:20","type":"offer","tab":"offers","title":"نگین الوندی واجد تخفیف شده","text":"۲۰٪ تخفیف معرفی","actionId":"mtcuqvhdpid9e","read":false,"createdAt":"2026-08-29T16:24:01.839Z"},{"id":"offer:mtcv0szn0vg73:20","type":"offer","tab":"offers","title":"خانم توکلی واجد تخفیف شده","text":"۲۰٪ تخفیف معرفی","actionId":"mtcv0szn0vg73","read":false,"createdAt":"2026-08-29T16:24:01.839Z"},{"id":"offer:mtcwta6engbgs:10","type":"offer","tab":"offers","title":"پریسا احمدی واجد تخفیف شده","text":"۱۰٪ تخفیف معرفی","actionId":"mtcwta6engbgs","read":false,"createdAt":"2026-08-29T16:24:01.839Z"},{"id":"offer:mtcx2fo7vjv3q:20","type":"offer","tab":"offers","title":"غزل رنجبران واجد تخفیف شده","text":"۲۰٪ تخفیف معرفی","actionId":"mtcx2fo7vjv3q","read":false,"createdAt":"2026-08-29T16:24:01.839Z"},{"id":"offer:mtetrh8xoqb5d:10","type":"offer","tab":"offers","title":"نفیسه عظیمی واجد تخفیف شده","text":"۱۰٪ تخفیف معرفی","actionId":"mtetrh8xoqb5d","read":false,"createdAt":"2026-08-29T20:21:02.960Z"}],"romanceHistory":[193,172,138,171,188,7,65,53],"referralSettings":{"perReferrals":1,"discountPercent":10},"version":3};
+
+const state = {
+  tab: 'home', loaded:false,
+  customers: [], appointments: [], services: [], offers: [],
+  materials: [], expenses: [], occasions: [], referralSettings: { perReferrals: 3, discountPercent: 10 },
+  smsTemplates: {
+    birthday: 'سلام {name} عزیز 🌸 تولدت مبارک 🎂💖 امیدواریم همیشه دلت شاد و لبت خندون باشه. منتظر دیدارتون توی سالن هستیم 💅',
+    occasion: '{name} عزیز، {occasion} مبارک 🌸💖 براتون بهترین‌ها رو آرزو می‌کنیم. منتظر دیدارتون توی سالن هستیم 💅'
+  },
+  unreadOccasions: [], unreadBirthdays: [], notifications: [], notifiedSystem: [], offerUsage: [],
+  romanceIndex: null, romanceHistory: [],
+  businessInfo: { address:'', instagram:'', phone:'', telegram:'', location:'' },
+  custSort: 'name', custFilter: 'all', custSearchQuery: '',
+  reportJY: todayJalali()[0], reportJM: todayJalali()[1],
+  apptJY: todayJalali()[0], apptJM: todayJalali()[1], apptSort:'newest', apptSelectedDate:null, calendarJY:todayJalali()[0], calendarJM:todayJalali()[1]
+};
+
+const STORAGE_PREFIX = 'nailapp_';
+async function storageGet(key){
+  try{ const raw = localStorage.getItem(STORAGE_PREFIX+key); return raw ? JSON.parse(raw) : null; }
+  catch(e){ console.error('storage get failed', key, e); return null; }
+}
+async function storageSet(key, value){
+  try{ localStorage.setItem(STORAGE_PREFIX+key, JSON.stringify(value)); }
+  catch(e){ console.error('storage set failed', key, e); showToast('خطا در ذخیره‌سازی'); }
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+async function loadAll(){
+  const [customers, appointments, services, offers, materials, expenses, referralSettings, occasions, smsTemplates, unreadOccasions, unreadBirthdays, notifications, notifiedSystem, romanceIndex, romanceHistory, offerUsage, businessInfo] = await Promise.all([
+    storageGet('customers'), storageGet('appointments'), storageGet('services'), storageGet('offers'),
+    storageGet('materials'), storageGet('expenses'), storageGet('referralSettings'), storageGet('occasions'),
+    storageGet('smsTemplates'), storageGet('unreadOccasions'), storageGet('unreadBirthdays'), storageGet('notifications'), storageGet('notifiedSystem'), storageGet('romanceIndex'), storageGet('romanceHistory'), storageGet('offerUsage'), storageGet('businessInfo')
+  ]);
+  const seed = INITIAL_BACKUP_DATA && INITIAL_BACKUP_DATA.data ? INITIAL_BACKUP_DATA.data : {};
+  state.customers = Array.isArray(customers) ? customers : (Array.isArray(seed.customers) ? structuredClone(seed.customers) : []);
+  state.appointments = Array.isArray(appointments) ? appointments : (Array.isArray(seed.appointments) ? structuredClone(seed.appointments) : []);
+  state.offers = Array.isArray(offers) ? offers : (Array.isArray(seed.offers) ? structuredClone(seed.offers) : []);
+  state.materials = Array.isArray(materials) ? materials : (Array.isArray(seed.materials) ? structuredClone(seed.materials) : []);
+  state.expenses = Array.isArray(expenses) ? expenses : (Array.isArray(seed.expenses) ? structuredClone(seed.expenses) : []);
+  if(referralSettings) state.referralSettings = referralSettings; else if(seed.referralSettings) state.referralSettings = structuredClone(seed.referralSettings);
+  if(smsTemplates) state.smsTemplates = {...state.smsTemplates, ...smsTemplates};
+  if(unreadOccasions) state.unreadOccasions = unreadOccasions;
+  if(unreadBirthdays) state.unreadBirthdays = unreadBirthdays;
+  if(Array.isArray(notifications)) state.notifications = notifications;
+  if(Array.isArray(notifiedSystem)) state.notifiedSystem = notifiedSystem;
+  if(Number.isInteger(romanceIndex)) state.romanceIndex = romanceIndex;
+  if(Array.isArray(romanceHistory)) state.romanceHistory = romanceHistory;
+  if(Array.isArray(offerUsage)) state.offerUsage = offerUsage;
+  if(businessInfo && typeof businessInfo==='object') state.businessInfo = {...state.businessInfo, ...businessInfo};
+  if(Array.isArray(occasions)){ state.occasions = occasions; } else if(Array.isArray(seed.occasions)){ state.occasions = structuredClone(seed.occasions); await storageSet('occasions',state.occasions); }
+  else {
+    state.occasions = BUILTIN_OCCASIONS.map(o=>({ id: uid(), builtin:true, smsTemplate:'', ...o }));
+    await storageSet('occasions', state.occasions);
+  }
+  if(services){ state.services = services; } else if(Array.isArray(seed.services)){ state.services = structuredClone(seed.services); await storageSet('services',state.services); }
+  else {
+    state.services = [
+      { id: uid(), name: 'کاشت ناخن', price: 550000 },
+      { id: uid(), name: 'ژلیش', price: 300000 },
+      { id: uid(), name: 'ترمیم ناخن', price: 250000 },
+      { id: uid(), name: 'طراحی و نقاشی', price: 150000 }
+    ];
+    await storageSet('services', state.services);
+  }
+  state.customers.forEach(c=>{if(!c.ownerType)c.ownerType=(c.notes||'').includes('مشتری سالن')?'salon':'me';});
+  state.services.forEach(x=>{if(!x.pricingMode)x.pricingMode=(x.name||'').includes('طراحی')?'quantity':'total';if(x.isMain==null)x.isMain=false;});
+  state.appointments.forEach(a=>{if(a.grossPrice==null)a.grossPrice=roundMoney(a.price||0);if(a.discountPercent==null)a.discountPercent=0;if(a.discountAmount==null)a.discountAmount=0;if(a.salonPercent==null)a.salonPercent=(customerType(state.customers.find(c=>c.id===a.customerId))==='salon'?30:0);if(Array.isArray(a.services))a.services.forEach(x=>{if(!x.unitMode){const ss=state.services.find(z=>z.id===x.serviceId);x.unitMode=ss&&ss.pricingMode||'total';}if(!x.quantity)x.quantity=1;if(x.unitPrice==null)x.unitPrice=Number(x.price)||0;if(x.total==null)x.total=roundMoney((x.unitPrice||0)*(x.unitMode==='quantity'?x.quantity:1));});a.price=roundMoney(a.price||0);});
+  await storageSet('customers',state.customers);await storageSet('services',state.services);await storageSet('appointments',state.appointments);await storageSet('offerUsage',state.offerUsage);await storageSet('appVersion',APP_VERSION);
+  state.loaded = true;
+}
+function showToast(msg){
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2000);
+}
+function fmtPrice(n){ if(!n && n!==0) return ''; return toFa(roundMoney(n).toLocaleString('en-US')) + ' تومان'; }
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str||''; return d.innerHTML; }
+
+/* ============ Customer analytics helpers ============ */
+function customerVisits(customerId){
+  return state.appointments.filter(a=>a.customerId===customerId && a.status!=='cancelled').sort((a,b)=>a.date.localeCompare(b.date));
+}
+function lastVisitIso(customerId){
+  const v = customerVisits(customerId);
+  return v.length ? v[v.length-1].date : null;
+}
+function daysSinceLastVisit(customerId){
+  const lv = lastVisitIso(customerId);
+  if(!lv) return null;
+  return daysBetween(lv, todayIso());
+}
+function smartFollowupCustomers(){
+  return state.customers.map(c=>{
+    const st=customerStats(c.id);
+    const days=daysSinceLastVisit(c.id);
+    if(days===null || st.avgGap===null) return null;
+    const threshold=Math.max(30, st.avgGap+7);
+    return {c, days, avgGap:st.avgGap, threshold, overdue:days-threshold};
+  }).filter(Boolean).filter(x=>x.overdue>=0).sort((a,b)=>b.overdue-a.overdue);
+}
+function customerStats(customerId){
+  const visits = customerVisits(customerId);
+  const dates = visits.map(v=>v.date);
+  const gaps = [];
+  for(let i=1;i<dates.length;i++) gaps.push(daysBetween(dates[i-1], dates[i]));
+  const avgGap = gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length) : null;
+  const servicesCount = {};
+  visits.forEach(v=>{
+    const svcs = (v.services && v.services.length) ? v.services : [{name: v.serviceName || 'نامشخص'}];
+    svcs.forEach(s=>{ const n = s.name||'نامشخص'; servicesCount[n]=(servicesCount[n]||0)+1; });
+  });
+  const totalSpend = visits.reduce((sum,v)=>sum+(Number(v.price)||0),0);
+  const avgTicket = visits.length ? Math.round(totalSpend/visits.length) : 0;
+  return { visits, gaps, avgGap, servicesCount, totalVisits: visits.length, lastVisit: dates.length?dates[dates.length-1]:null, totalSpend, avgTicket };
+}
+function referralCount(customerId){
+  return state.customers.filter(c=>c.referrerId===customerId).length;
+}
+function referralDiscountFor(customerId){
+  const n = referralCount(customerId);
+  const s = state.referralSettings;
+  if(!s.perReferrals) return 0;
+  return Math.floor(n / s.perReferrals) * s.discountPercent;
+}
+
+/* ============ Rendering ============ */
+const MORE_TABS = ['services','offers','occasions','materials','reports'];
+const VALID_TABS = ['home','customers','appointments','calendar','more', ...MORE_TABS];
+
+let handlingPopState=false;
+let tabAnimating=false;
+function renderTabInto(main){
+  const fab=document.getElementById('fabBtn');
+  if(fab) fab.style.display=state.tab==='more'?'none':'flex';
+  if(!state.loaded){main.innerHTML='<div class="loading">در حال بارگذاری...</div>';return;}
+  syncNotifications(); updateNavActive(); updateNavBadges();
+  if(state.tab==='home') return renderHome(main);
+  if(state.tab==='customers') return renderCustomers(main);
+  if(state.tab==='appointments') return renderAppointments(main);
+  if(state.tab==='calendar') return renderCalendar(main);
+  if(state.tab==='more') return renderMore(main);
+  if(state.tab==='services') return renderServices(main);
+  if(state.tab==='offers') return renderOffers(main);
+  if(state.tab==='occasions') return renderOccasions(main);
+  if(state.tab==='materials') return renderMaterials(main);
+  if(state.tab==='reports') return renderReports(main);
+}
+function setTab(tab, opts={}){
+  if(!VALID_TABS.includes(tab)) return;
+  const oldTab=state.tab;
+  if(oldTab===tab && !opts.force) return;
+  const main=document.getElementById('main');
+  const order=['home','customers','appointments','calendar','more'];
+  const oi=order.indexOf(oldTab), ni=order.indexOf(tab);
+  // For swipe navigation, use the actual finger direction so the wrap
+  // from آخر tab ↔ خانه has the same physical animation as every other tab.
+  // swipeDx > 0 = finger moved right => new tab enters from the left.
+  // swipeDx < 0 = finger moved left  => new tab enters from the right.
+  const dir = typeof opts.swipeDx === 'number'
+    ? (opts.swipeDx > 0 ? 1 : -1)
+    : ((ni>=0&&oi>=0&&ni>oi) ? -1 : 1);
+  state.tab=tab; storageSet('lastTab',tab);
+  if(!handlingPopState) history.pushState({nailapp:true,tab},'',location.href);
+  if(!main || !state.loaded || tabAnimating){ render(); return; }
+  tabAnimating=true;
+  const oldPane=document.createElement('div'), newPane=document.createElement('div'), stage=document.createElement('div');
+  stage.className='tab-stage'; oldPane.className='tab-pane'; newPane.className='tab-pane';
+  oldPane.innerHTML=main.innerHTML.replace(/\sid=(['"]).*?\1/g,'');
+  stage.appendChild(oldPane); stage.appendChild(newPane); main.innerHTML=''; main.style.overflow='hidden'; main.style.padding='0'; main.appendChild(stage);
+  renderTabInto(newPane);
+  oldPane.style.transform='translateX(0)'; newPane.style.transform=`translateX(${dir<0?'100%':'-100%'})`;
+  requestAnimationFrame(()=>{oldPane.classList.add('animating');newPane.classList.add('animating');oldPane.style.transform=`translateX(${dir<0?'-100%':'100%'})`;newPane.style.transform='translateX(0)';});
+  setTimeout(()=>{main.innerHTML='';newPane.className='';newPane.removeAttribute('style');main.style.overflow='';main.style.padding='16px 16px 90px';main.appendChild(newPane);tabAnimating=false;updateNavActive();updateNavBadges();if(main)main.scrollTop=0;},360);
+}
+
+function updateNavActive(){
+  document.querySelectorAll('nav.bottom button').forEach(b=>{
+    const active = b.dataset.tab===state.tab || (b.dataset.tab==='more' && MORE_TABS.includes(state.tab));
+    b.classList.toggle('active', active);
+  });
+}
+function toggleDot(id, show){ const el=document.getElementById(id); if(el) el.classList.toggle('show', !!show); }
+function hasTodayAppt(){ return state.appointments.some(a=>a.date===todayIso() && a.status!=='cancelled'); }
+function hasOverdueFollowup(){ return state.customers.some(c=>{ const d=daysSinceLastVisit(c.id); return d!==null && d>=30; }); }
+function hasUpcomingReminders(){ return (upcomingOccasions(7).length + upcomingBirthdays(7).length) > 0; }
+
+function occasionReminderKey(o){
+  const next = nextOccasionDate(o);
+  return next ? `${o.id}:${next}` : null;
+}
+function birthdayReminderKey(c){
+  if(!c || !c.birthDate) return null;
+  const [,bm,bd] = isoToJalali(c.birthDate);
+  const [ty,tm,td] = todayJalali();
+  let y = ty;
+  if(tm>bm || (tm===bm && td>bd)) y++;
+  const dim = daysInJalaaliMonth(y,bm);
+  const [gy,gm,gd] = toGregorian(y,bm,Math.min(bd,dim));
+  return `${c.id}:${isoFromParts(gy,gm,gd)}`;
+}
+function notificationKey(type, id, date=''){ return `${type}:${id}:${date}`; }
+
+function appointmentReminderInfo(a){
+  if(!a || a.status!=='upcoming' || !a.date || !a.time) return null;
+  const dt = new Date(`${a.date}T${String(a.time).slice(0,5)}:00`);
+  if(Number.isNaN(dt.getTime())) return null;
+  const diff = dt.getTime() - Date.now();
+  // اعلان نوبت فقط در بازه ۲۴ ساعت مانده تا شروع نوبت فعال است.
+  if(diff < 0 || diff > 24*60*60*1000) return null;
+  return {dt,diff};
+}
+
+function buildNotificationCandidates(){
+  const out=[];
+
+  // ۱) نوبت: فقط از ۲۴ ساعت قبل تا لحظه شروع نوبت
+  state.appointments.forEach(a=>{
+    const info = appointmentReminderInfo(a);
+    if(!info) return;
+    const k = notificationKey('appointment', a.id, a.date+' '+a.time);
+    const hours = Math.max(0, Math.ceil(info.diff/(60*60*1000)));
+    const timing = hours <= 1 ? 'تا شروع نوبت کمتر از یک ساعت مانده' : `${toFa(hours)} ساعت تا نوبت مانده`;
+    out.push({
+      id:k, type:'appointment', tab:'appointments',
+      title:`نوبت ${a.customerName||'مشتری'} نزدیک است`,
+      text:`${formatJalaliShort(a.date)} · ${a.time} · ${a.serviceName||'خدمت'} · ${timing}`,
+      actionId:a.id
+    });
+  });
+
+  // ۲) تولد: از ۷ روز قبل؛ شناسه بر اساس تولد همان سال است
+  upcomingBirthdays(7).forEach(x=>{
+    const k=birthdayReminderKey(x.c); if(!k) return;
+    out.push({
+      id:notificationKey('birthday',x.c.id,k),
+      type:'birthday', tab:'home',
+      title:`تولد ${x.c.name} نزدیک است`,
+      text:x.days===0?'امروز تولدشه 🎂':`${toFa(x.days)} روز تا تولد 🎂`,
+      actionId:x.c.id
+    });
+  });
+
+  // ۳) مناسبت: از ۷ روز قبل؛ شناسه بر اساس تاریخ همان سال است
+  upcomingOccasions(7).forEach(x=>{
+    const k=occasionReminderKey(x.o); if(!k) return;
+    out.push({
+      id:notificationKey('occasion',x.o.id,k),
+      type:'occasion', tab:'occasions',
+      title:`${x.o.title} نزدیک است`,
+      text:x.days===0?'امروز':`${toFa(x.days)} روز مانده`,
+      actionId:x.o.id
+    });
+  });
+
+  // ۴) پیگیری: وقتی از زمان معمول مراجعه مشتری عبور کرده باشد
+  smartFollowupCustomers().slice(0,20).forEach(x=>{
+    const k=notificationKey('followup',x.c.id,lastVisitIso(x.c.id)||'');
+    out.push({
+      id:k, type:'followup', tab:'customers',
+      title:`وقت پیگیری ${x.c.name} رسیده`,
+      text:`${toFa(x.days)} روز از آخرین مراجعه گذشته`,
+      actionId:x.c.id
+    });
+  });
+
+  // ۵) تخفیف: با تغییر درصد تخفیف، شناسه جدید و اعلان جدید ایجاد می‌شود
+  state.customers.filter(c=>referralDiscountFor(c.id)>0).forEach(c=>{
+    const discount = referralDiscountFor(c.id);
+    const k=notificationKey('offer',c.id,String(discount));
+    const used = state.offerUsage.some(u=>u.kind==='referral' && u.customerId===c.id && Number(u.discount)===Number(discount) && !u.cancelled);
+    if(used) return;
+    out.push({
+      id:k, type:'offer', tab:'offers',
+      title:`${c.name} واجد افر شده`,
+      text:`${toFa(discount)}٪ تخفیف معرفی — آماده استفاده`,
+      actionId:c.id, offerTitle:'تخفیف معرفی'
+    });
+  });
+  // افرهای ویژه‌ای که هنوز برای مشتری ثبت‌شده انجام نشده‌اند.
+  state.offers.forEach(o=>{
+    const valid = !o.validUntil || o.validUntil>=todayIso();
+    if(!valid) return;
+    state.customers.forEach(c=>{
+      const k=notificationKey('specialOffer',o.id+':'+c.id,o.validUntil||'');
+      const used=state.offerUsage.some(u=>u.kind==='special'&&u.offerId===o.id&&u.customerId===c.id&&!u.cancelled);
+      if(!used && o.customerId===c.id){
+        out.push({id:k,type:'offer',tab:'offers',title:`${c.name} به افر «${o.title}» رسیده`,text:`${o.discount} — هنوز انجام نشده`,actionId:c.id,offerId:o.id});
+      }
+    });
+  });
+
+  return out;
+}
+
+function syncNotifications(){
+  const candidates=buildNotificationCandidates();
+  const candidateIds=new Set(candidates.map(n=>n.id));
+  const existing=new Map((Array.isArray(state.notifications)?state.notifications:[]).map(n=>[n.id,n]));
+  let changed=false;
+
+  candidates.forEach(n=>{
+    const old=existing.get(n.id);
+    if(!old){
+      existing.set(n.id,{...n,read:false,createdAt:new Date().toISOString()});
+      changed=true;
+      return;
+    }
+
+    // اطلاعات پویا مثل «۳ روز مانده» یا ساعت نوبت باید به‌روز شود،
+    // ولی read و createdAt هرگز با رندر مجدد ریست نمی‌شوند.
+    const updated={...old, ...n, read:!!old.read, createdAt:old.createdAt||new Date().toISOString()};
+    if(JSON.stringify(updated)!==JSON.stringify(old)){
+      existing.set(n.id,updated);
+      changed=true;
+    }
+  });
+
+  // اعلان خوانده‌شده فقط تا وقتی رویداد واقعاً فعال است نگه داشته می‌شود.
+  // اعلان خوانده‌نشده حتی اگر موقتاً از بازه فعال خارج شود، حذف نمی‌شود
+  // تا کاربر فرصت دیدن آن را داشته باشد.
+  const next=[...existing.values()].filter(n=>candidateIds.has(n.id) || !n.read);
+
+  if(next.length!==state.notifications.length ||
+     next.some((n,i)=>JSON.stringify(n)!==JSON.stringify(state.notifications[i]))) changed=true;
+
+  state.notifications=next;
+  if(changed) storageSet('notifications',state.notifications);
+}
+
+function unreadNotifications(){ return state.notifications.filter(n=>!n.read); }
+
+function updateNavBadges(){
+  const unread=unreadNotifications();
+  toggleDot('dot_home', unread.some(n=>n.tab==='home'));
+  toggleDot('dot_customers', unread.some(n=>n.tab==='customers'));
+  toggleDot('dot_calendar', unread.some(n=>n.tab==='calendar'||n.type==='appointment'));
+  toggleDot('dot_appointments', unread.some(n=>n.tab==='appointments'));
+  toggleDot('dot_more', false);
+}
+
+async function markNotificationRead(id){
+  const n=state.notifications.find(x=>x.id===id);
+  if(!n || n.read) return;
+  n.read=true;
+  await storageSet('notifications',state.notifications);
+  updateNavBadges();
+  render();
+}
+
+function markNotificationsForTabRead(tab){
+  // عمداً هیچ اعلانی صرفاً با باز کردن تب خوانده نمی‌شود.
+}
+
+function notificationDestination(n){
+  if(n.type==='birthday') return `markBirthdayRead('${n.actionId}')`;
+  if(n.type==='occasion') return `openOccasionDetail('${n.actionId}')`;
+  if(n.type==='followup') return `openCustomerDetail('${n.actionId}')`;
+  if(n.type==='offer') return `openReferralDetailFromNotification('${n.id}','${n.actionId}')`;
+  if(n.type==='appointment') return `openAppointmentActions('${n.actionId}')`;
+  return `setTab('${n.tab}')`;
+}
+
+function renderNotificationCenter(limit=8){
+  const unread=unreadNotifications()
+    .sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))
+    .slice(0,limit);
+  if(!unread.length) return '';
+  return `<div class="notification-center"><div class="notification-head"><div class="section-title" style="margin:0">🔔 اعلان‌های جدید</div><span class="notification-count">${toFa(unread.length)}</span></div>${unread.map(n=>`<div class="notification-item" onclick="handleNotificationClick('${n.id}')"><span class="ni-dot"></span><div style="flex:1"><div class="name">${escapeHtml(n.title)}</div><div class="sub">${escapeHtml(n.text)}</div></div></div>`).join('')}</div>`;
+}
+
+async function handleNotificationClick(id){
+  const n=state.notifications.find(x=>x.id===id);
+  if(!n) return;
+  await markNotificationRead(id);
+  if(n.type==='birthday') return openBirthdaySms(n.actionId);
+  if(n.type==='occasion') return openOccasionDetail(n.actionId);
+  if(n.type==='followup') return openCustomerDetail(n.actionId);
+  if(n.type==='appointment') return openAppointmentActions(n.actionId);
+  if(n.type==='offer') return openReferralDetailFromNotification(n.id,n.actionId);
+  setTab(n.tab);
+}
+
+async function requestSystemNotifications(){
+  if(typeof Notification==='undefined'){ showToast('مرورگر این گوشی اعلان وب را پشتیبانی نمی‌کند'); return; }
+  if(!window.isSecureContext){ showToast('برای اعلان گوشی، برنامه باید روی HTTPS یا به‌صورت PWA نصب‌شده اجرا شود'); return; }
+  const p=await Notification.requestPermission();
+  updateNotificationButton();
+  if(p==='granted'){ await syncNotifications(); showToast('اعلان‌های گوشی فعال شد 🔔'); }
+  else showToast('اجازه اعلان داده نشد');
+}
+function updateNotificationButton(){
+  const b=document.getElementById('enableNotificationsBtn'); if(!b) return;
+  if(typeof Notification==='undefined') b.style.display='none';
+  else if(Notification.permission==='granted') b.textContent='🔔 اعلان‌های گوشی فعال است';
+  else b.textContent='🔔 فعال‌سازی اعلان‌های گوشی';
+}
+function syncUnreadReminders(){ return syncNotifications(); }
+function markOccasionRead(id){ return markNotificationRead(state.notifications.find(n=>n.type==='occasion'&&n.actionId===id)?.id); }
+function markBirthdayRead(id){ return markNotificationRead(state.notifications.find(n=>n.type==='birthday'&&n.actionId===id)?.id); }
+function isOccasionUnread(o){ return state.notifications.some(n=>!n.read&&n.type==='occasion'&&n.actionId===o.id); }
+function isBirthdayUnread(c){ return state.notifications.some(n=>!n.read&&n.type==='birthday'&&n.actionId===c.id); }
+function hasUnreadOccasionReminders(){ return state.notifications.some(n=>!n.read&&(n.type==='occasion'||n.type==='birthday')); }
+
+/* 200 short romantic messages from Amir to Sarina */
+const ROMANCE_A = [
+  'جیگر، امیر خیلی دوستت داره',
+  'مموش جان، تو قشنگ‌ترین اتفاق زندگی امیری',
+  'تربچه‌ی من، بودنت دل امیرو گرم می‌کنه',
+  'عشقم، کنار تو همه‌چی قشنگ‌تره',
+  'سارینای امیر، لبخندت حال منو خوب می‌کنه',
+  'متین جان، تو آرامش قلب امیری',
+  'جیگر، امیر با داشتن تو خوشبخت‌ترینه',
+  'مموش، دلم برای خنده‌هات ضعف میره',
+  'تربچه، تو دلیل خیلی از لبخندای امیری',
+  'عشق من، هیچ‌کس جای تو رو نمی‌گیره',
+  'سارینا جان، دوست داشتنت برای امیر عادت نیست',
+  'جیگر، تو خودِ حال خوب امیری',
+  'مموش من، امیر به بودنت افتخار می‌کنه',
+  'تربچه‌ی شیرینم، تو همیشه عزیز دلی',
+  'عشقم، خونه با تو خونه‌ست',
+  'متین جان، قلب امیر پیش توئه',
+  'جیگر، امیر هر روز بیشتر دوستت داره',
+  'مموش، تو خاص‌ترین آدم دنیای امیری',
+  'سارینای من، صدات برای امیر آرامشه',
+  'عشق من، تو قشنگ‌ترین قسمت روز امیری',
+  'جیگر، امیر دلش می‌خواد همیشه بخندی',
+  'مموش جان، تو برای امیر یعنی عشق',
+  'تربچه، بودنت یه نعمت بزرگه',
+  'عشقم، امیر کنار تو خودشِ واقعیشه',
+  'سارینا، تو انتخاب قشنگ قلب امیری',
+  'متین جان، هیچ روزی بدون دوست داشتنت کامل نیست',
+  'جیگر، امیر بهت افتخار می‌کنه',
+  'مموش، تو شیرین‌ترین آدم زندگی امیری',
+  'تربچه جان، دلم می‌خواد همیشه کنارت باشم',
+  'عشقم، تو بهترین رفیق و عشق امیری',
+  'سارینا جان، تو برای امیر بی‌نظیری',
+  'جیگر، دوست داشتنت ته نداره',
+  'مموش، امیر با فکر تو لبخند می‌زنه',
+  'تربچه، تو دل امیر یه جای مخصوص داری',
+  'عشق من، امیر تو رو با همه‌ی قلبش می‌خواد',
+  'متین جان، تو قشنگ‌ترین آرامش امیری',
+  'جیگر، امیر خوشحاله که تو رو داره',
+  'مموش من، تو همیشه انتخاب اول قلب امیری',
+  'سارینا، امیر با تو آینده رو قشنگ می‌بینه',
+  'تربچه جان، تو خودِ دوست‌داشتنی بودنی',
+  'عشقم، امیر بدون تو یه چیزی کم داره',
+  'جیگر، لبخندت جایزه‌ی امیری',
+  'مموش، دلم برایت همیشه یه گوشه‌ای می‌تپه',
+  'سارینای من، تو دلیل آرامش امیری',
+  'عشق من، امیر هر جا باشه دلش پیش توئه',
+  'متین جان، تو برای امیر کافی‌تر از کافی‌ای',
+  'تربچه، دوست داشتنت شیرین‌ترین حس امیری',
+  'جیگر، امیر عاشق جزئیات کوچیکت هم هست',
+  'مموش، تو بهترین آدم برای امیری',
+  'سارینا جان، کنار تو زمان زود می‌گذره',
+  'عشقم، امیر همیشه هواتو داره'
+];
+const ROMANCE_B = [
+  '؛ امیر هر روز بیشتر عاشقت میشه ❤️',
+  '؛ امیر دلش می‌خواد همیشه کنارت باشه 🥰❤️',
+  '؛ تو قشنگ‌ترین آدم دنیای امیری 💕',
+  '؛ امیر با فکر تو لبخند می‌زنه 🫶🏻💗'
+];
+// 200 پیام با ترتیب درهم‌ریخته؛ دیگر چهار نسخه از یک جمله پشت سر هم نمی‌آید.
+const ROMANTIC_MESSAGES = ROMANCE_A.flatMap(a=>ROMANCE_B.map(b=>a+b));
+// ترتیب را به‌صورت ثابت درهم می‌ریزیم تا هر بار برنامه باز می‌شود ترتیب عوض نشود.
+(function shuffleRomance(){
+  let seed=20260826;
+  const rand=()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
+  for(let i=ROMANTIC_MESSAGES.length-1;i>0;i--){ const j=Math.floor(rand()*(i+1)); [ROMANTIC_MESSAGES[i],ROMANTIC_MESSAGES[j]]=[ROMANTIC_MESSAGES[j],ROMANTIC_MESSAGES[i]]; }
+  // اگر دو پیام پشت‌سرهم از یک متن اصلی باشند، جایشان را با بعدی عوض می‌کنیم.
+  for(let i=1;i<ROMANTIC_MESSAGES.length;i++){
+    const base=x=>x.split('؛ امیر')[0];
+    if(base(ROMANTIC_MESSAGES[i])===base(ROMANTIC_MESSAGES[i-1])){
+      const j=ROMANTIC_MESSAGES.findIndex((x,k)=>k>i+1 && base(x)!==base(ROMANTIC_MESSAGES[i-1]));
+      if(j>0) [ROMANTIC_MESSAGES[i],ROMANTIC_MESSAGES[j]]=[ROMANTIC_MESSAGES[j],ROMANTIC_MESSAGES[i]];
+    }
+  }
+})();
+const ROMANCE_EXTRA = [
+  'تربچه جان، تو لبخند همیشگی قلب امیری ❤️',
+  'مموش من، تو قشنگ\u200cترین دلیل آرامش منی 🥰',
+  'جیگر، کنار تو حتی سکوت هم شیرینه 💗',
+  'عشقم، بودنت برای امیر یعنی خوشبختی واقعی ❤️',
+  'عسل من، نگاهت هنوزم دل امیرو می\u200cبره 😍',
+  'سارینای من، تو امن\u200cترین جای قلب امیری 🫶🏻',
+  'تربچه، امیر عاشق شیطنت\u200cهای دوست\u200cداشتنیت شده 😘',
+  'مموش جان، تو همون آدمی هستی که دلم می\u200cخواست داشته باشم 💕',
+  'جیگر، با تو هر روز یه بهونه برای عاشق\u200cتر شدن دارم ❤️',
+  'عشقم، تو قشنگ\u200cترین عادت زندگی امیری 🌷',
+  'متین جان، دلم با اسم تو هم آروم می\u200cگیره 💖',
+  'عسل جان، امیر دلش می\u200cخواد همیشه خوشحالت کنه 🥰',
+  'تربچه\u200cی من، تو از همه\u200cی آرزوهای من قشنگ\u200cتری ✨❤️',
+  'مموش، تو کوچیک\u200cترین لبخندم رو هم قشنگ می\u200cکنی 💗',
+  'جیگرم، دلم هنوز با دیدنت ذوق می\u200cکنه 😍',
+  'سارینا، تو برای امیر فقط عشق نیستی؛ خونه\u200cای ❤️',
+  'عشقم، دلم به داشتن تو قرصه 🫶🏻',
+  'تربچه جان، تو بهترین قسمت فردای امیری 🌸',
+  'مموش من، امیر با تو از دنیا کمتر می\u200cترسه 💕',
+  'عسل، تو همون حس خوبی هستی که تموم نمی\u200cشه ❤️',
+  'جیگر، صدای خنده\u200cهات موسیقی مورد علاقه امیری 🎶💗',
+  'متین جان، دلم همیشه یه صندلی برای تو کنار خودش داره 🥰',
+  'سارینای من، تو دلیل لبخندهای بی\u200cدلیل امیری ❤️',
+  'تربچه، امیر دوست داره پیر شدنت رو هم کنار خودش ببینه 💕',
+  'مموش، تو قشنگ\u200cترین همراه زندگی امیری هستی 🫶🏻',
+  'عشقم، هیچ جای دنیا به اندازه کنار تو امن نیست ❤️',
+  'عسل من، تو شیرین\u200cترین بخش روزای امیری 🍯💖',
+  'جیگر، دلم می\u200cخواد هر روز دوباره انتخابت کنم ❤️',
+  'سارینا جان، تو برای امیر همیشه خاص می\u200cمونی 🌷',
+  'مموش جان، تو حتی روزای معمولی رو هم خاص می\u200cکنی 💕',
+  'تربچه، قلب امیر با بودن تو کامل\u200cتر می\u200cزنه ❤️',
+  'عشقم، تو دلیل خیلی از «خدا رو شکر»های امیری هستی 🙏🏻💗',
+  'جیگر، امیر عاشق نگاه کردن به خوشحالیت می\u200cشه 🥰',
+  'عسل جان، تو قشنگ\u200cترین اتفاقی هستی که تکرار می\u200cخوامش ❤️',
+  'متین، کنار تو امیر خودش رو بیشتر دوست داره 💖',
+  'سارینا، تو همون عشق آرومی هستی که دلم می\u200cخواست ❤️',
+  'تربچه\u200cی شیرینم، دلم با تو قرصه و خیالم راحته 🫶🏻',
+  'مموش، تو باعث می\u200cشی امیر به فردا لبخند بزنه 💕',
+  'عشقم، دوست داشتنت برای من تاریخ انقضا نداره ❤️',
+  'جیگر، هر بار می\u200cبینمت انگار اولین باره 😍',
+  'عسل، امیر با تو معنی واقعی باهم بودن رو فهمید 💗',
+  'سارینای من، تو بهترین هم\u200cتیمی زندگی امیری 🥰',
+  'تربچه، امیر برای خنده\u200cهات هزار بار عاشق می\u200cشه ❤️',
+  'مموش جان، دلم می\u200cخواد همیشه پشتت باشم 🫶🏻',
+  'عشقم، تو یه تکه از قلب امیری که هیچ\u200cوقت جدا نمی\u200cشه 💕',
+  'جیگرم، دوست داشتنت ساده\u200cترین و قشنگ\u200cترین کار دنیاست ❤️',
+  'عسل من، تو برای امیر از هر هدیه\u200cای باارزش\u200cتری 🎁💖',
+  'سارینا، امیر با تو حس می\u200cکنه برنده\u200cی زندگیه 🥰',
+  'تربچه جان، لبخندت خستگی\u200cهای امیرو می\u200cشوره می\u200cبره 🌸❤️',
+  'مموش، تو قشنگ\u200cترین دلیل دلتنگی\u200cهای امیری 💗',
+  'عشقم، حتی وقتی دوری، دلم نزدیکته 🫶🏻',
+  'جیگر، امیر دلش می\u200cخواد خاطره\u200cهای بیشتری باهات بسازه ❤️',
+  'عسل، تو برای امیر یعنی یک عالمه حس خوب 💕',
+  'سارینای من، دوست داشتنت هر روز تازه\u200cتر می\u200cشه 🌷',
+  'تربچه، تو همون لبخندی هستی که امیر نمی\u200cتونه ازش خسته بشه 😘',
+  'مموش جان، قلبم با تو ریتم قشنگ\u200cتری داره ❤️',
+  'عشقم، تو بهترین دلیل برای ادامه دادن روزای سختی 💖',
+  'جیگرم، امیر عاشق اون نسخه\u200cای از خودشه که کنار تو می\u200cشه 🥰',
+  'عسل جان، تو برای امیر یه آرامش واقعی و عمیقی ❤️',
+  'سارینا، هر جا تو باشی برای امیر یه جای خوبه 🫶🏻',
+  'تربچه\u200cی من، دلم همیشه هواتو داره 💕',
+  'مموش، تو قشنگ\u200cترین «کنارمی» زندگی امیری ❤️',
+  'عشقم، با تو حتی خرید ساده هم خاطره می\u200cشه 😄💗',
+  'جیگر، تو از اون آدمایی هستی که باید قدرشون رو هر روز دونست ❤️',
+  'عسل من، امیر عاشق برق چشمای توئه 😍',
+  'سارینای عزیزم، تو دلیل خیلی از امیدهای فردای امیری 💖',
+  'تربچه جان، دلم می\u200cخواد هر موفقیتت رو کنار خودم جشن بگیرم 🎉❤️',
+  'مموش من، تو بهترین خبر خوب روزای امیری هستی 💕',
+  'عشقم، قلب امیر با اسم تو زودتر می\u200cتپه 🥰',
+  'جیگرم، تو همون آدمی هستی که دلم نمی\u200cخواد ازش سیر بشم ❤️',
+  'عسل، تو شیرینی زندگی امیری بدون اغراق 🍯💗',
+  'سارینا جان، با تو آینده ترسناک نیست، قشنگه 🫶🏻',
+  'تربچه، امیر دوست داره همیشه باعث افتخارت باشه ❤️',
+  'مموش جان، تو برای امیر از هزار تا جمله قشنگ\u200cتری 💕',
+  'عشقم، دلم می\u200cخواد هر شب با خیال لبخندت بخوابم 🌙❤️',
+  'جیگر، تو یه جور قشنگی که توضیح دادنش سخته 😍',
+  'عسل من، تو آرامش بعد از شلوغی دنیای امیری 💖',
+  'سارینای من، تو برای امیر همیشه «همین تو» بهترین انتخابی ❤️',
+  'تربچه جان، امیر با تو عاشق جزئیات زندگی شده 🌷',
+  'مموش، تو دلیل ذوق کردن\u200cهای کودکانه امیری 🥰',
+  'عشقم، هیچ جمله\u200cای اندازه خودت قشنگ نیست ❤️',
+  'جیگرم، دلم برای هر خاطره\u200cای که با تو می\u200cسازم تنگ می\u200cشه 💗',
+  'عسل، تو همون آرامشی هستی که امیر همیشه دنبالش بود 🫶🏻',
+  'سارینا جان، امیر کنار تو دلش گرم\u200cتره ❤️',
+  'تربچه، تو قشنگ\u200cترین «ما»ی زندگی امیری 💕',
+  'مموش من، هر بار اسمت میاد لبخندم خودش میاد 😌❤️',
+  'عشقم، تو باعث شدی دوست داشتن برای امیر معنی عمیق\u200cتری داشته باشه 💖',
+  'جیگر، امیر از داشتن قلب مهربونت خوشحاله 🥰',
+  'عسل جان، تو همیشه یه گوشه از فکر امیری 🍯❤️',
+  'سارینای من، تو قشنگ\u200cترین همراه سفر زندگی امیری 🌸',
+  'تربچه، امیر به تو و قلب قشنگت افتخار می\u200cکنه ❤️',
+  'مموش جان، دلم می\u200cخواد هر روز بیشتر از دیروز خوشحالت کنم 💕',
+  'عشقم، تو برای امیر فقط امروز نیستی؛ همه فردایی ❤️',
+  'جیگرم، بودن تو کنارم خودش یه جشنه 🎉💗',
+  'عسل من، تو دلیل خیلی از لبخندهای پنهونی امیری 😍',
+  'سارینا، امیر هر بار نگاهت می\u200cکنه یه دلیل تازه برای عشق پیدا می\u200cکنه ❤️',
+  'تربچه\u200cی من، تو دوست\u200cداشتنی\u200cترین آدم دنیای امیری 🫶🏻',
+  'مموش، دلم می\u200cخواد همیشه دستت توی دستم باشه 💕',
+  'عشقم، تو بهترین اتفاقی هستی که امیر نمی\u200cخواد تموم بشه ❤️',
+  'جیگر، امیر دوستت داره؛ همین ساده، همین عمیق 💖',
+  'عسل جان، با تو دل امیر جای درستشه 🥰',
+  'سارینای من، دوست داشتنت هر روز یه رنگ تازه داره 🌷❤️',
+  'تربچه، تو قشنگ\u200cترین دلیل آرامش شبای امیری 🌙💗',
+  'مموش جان، امیر هنوزم با دیدنت دلش می\u200cلرزه 😍',
+  'عشقم، تو برای امیر همیشه اولویت قلبی ❤️',
+  'جیگرم، دلم می\u200cخواد همه خوشی\u200cهای دنیا سهم تو باشه 🫶🏻',
+  'عسل من، تو قشنگ\u200cترین اسم برای حس خوب امیری هستی 💕',
+  'سارینا، امیر تو رو برای تمام روزهای معمولی و خاصش می\u200cخواد ❤️',
+  'تربچه جان، کنار تو زندگی مزه بهتری داره 💗',
+  'مموش، تو همون کسی هستی که دلم باهاش آینده می\u200cخواد 🥰'
+];
+ROMANTIC_MESSAGES.push(...ROMANCE_EXTRA);
+
+function dayOfYear(){
+  const d=new Date();
+  return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(d.getFullYear(),0,0))/86400000);
+}
+function currentRomanceIndex(){
+  return state.romanceIndex===null ? dayOfYear()%ROMANTIC_MESSAGES.length : state.romanceIndex%ROMANTIC_MESSAGES.length;
+}
+async function nextRomance(){
+  const current=currentRomanceIndex();
+  let next=current;
+  // هر بار یک پیام متفاوت انتخاب کن؛ حداقل تا تمام شدن چرخه، پیام قبلی دوباره نمی‌آید.
+  const recent=Array.isArray(state.romanceHistory)?state.romanceHistory:[];
+  const blocked=new Set(recent.slice(-24));
+  const candidates=[];
+  for(let i=0;i<ROMANTIC_MESSAGES.length;i++) if(i!==current && !blocked.has(i)) candidates.push(i);
+  if(!candidates.length){
+    for(let i=0;i<ROMANTIC_MESSAGES.length;i++) if(i!==current) candidates.push(i);
+    state.romanceHistory=[];
+  }
+  next=candidates[Math.floor(Math.random()*candidates.length)];
+  state.romanceIndex=next;
+  state.romanceHistory=[...(state.romanceHistory||[]),next].slice(-24);
+  await storageSet('romanceIndex', state.romanceIndex);
+  await storageSet('romanceHistory', state.romanceHistory);
+  render();
+}
+function renderRomanceCard(){
+  return `<div class="card romance-card">
+    <div class="section-title">💌 یه حرف از طرف امیر</div>
+    <div class="romance-text">${escapeHtml(ROMANTIC_MESSAGES[currentRomanceIndex()])}</div>
+    <div class="romance-actions"><button class="btn small ghost" onclick="nextRomance()">یکی دیگه بگو 💕</button></div>
+  </div>`;
+}
+
+function render(){ const main=document.getElementById('main'); if(main) renderTabInto(main); }
+
+function exportBackup(){
+  try{
+    const backup={version:3,app:'nailapp',createdAt:new Date().toISOString(),data:{}};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k && k.startsWith(STORAGE_PREFIX)){
+        const shortKey=k.slice(STORAGE_PREFIX.length);
+        try{ backup.data[shortKey]=JSON.parse(localStorage.getItem(k)); }
+        catch(e){ backup.data[shortKey]=localStorage.getItem(k); }
+      }
+    }
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='backup-salon-nail.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showToast('بکاپ با موفقیت ساخته شد');
+  }catch(err){ console.error(err); showToast('ساخت بکاپ انجام نشد'); }
+}
+function importBackup(){
+  const input=document.getElementById('globalBackupFileInput');
+  if(!input){ showToast('ابزار بازیابی در دسترس نیست'); return; }
+  input.value='';
+  input.click();
+}
+function handleBackupFile(input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const backup=JSON.parse(e.target.result);
+      if(!backup || backup.app!=='nailapp' || !backup.data || typeof backup.data!=='object') throw new Error('invalid');
+      const keys=Object.keys(backup.data);
+      if(!keys.length) throw new Error('empty');
+      if(!confirm('اطلاعات فعلی با این نسخه پشتیبان جایگزین شود؟')) return;
+      keys.forEach(k=>localStorage.setItem(STORAGE_PREFIX+k,JSON.stringify(backup.data[k])));
+      showToast('بازیابی با موفقیت انجام شد');
+      setTimeout(()=>location.reload(),700);
+    }catch(err){ console.error(err); showToast('فایل پشتیبان معتبر نیست'); }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+function openBusinessInfoForm(){
+  const b=state.businessInfo||{};
+  openModal(`<h3>اطلاعات سالن</h3>
+    <p class="muted" style="line-height:1.8;margin-top:5px;">هر موردی که نمی‌خواهی در پیامک باشد خالی بگذار.</p>
+    <label>آدرس</label><textarea id="fBizAddress" rows="2" placeholder="آدرس سالن">${escapeHtml(b.address||'')}</textarea>
+    <label>پیج اینستاگرام</label><input id="fBizInstagram" placeholder="مثلاً @salon_name" value="${escapeHtml(b.instagram||'')}">
+    <label>شماره تماس</label><input id="fBizPhone" inputmode="tel" placeholder="شماره تماس سالن" value="${escapeHtml(b.phone||'')}">
+    <label>آیدی تلگرام</label><input id="fBizTelegram" placeholder="مثلاً @salon_name" value="${escapeHtml(b.telegram||'')}">
+    <label>لوکیشن</label><input id="fBizLocation" placeholder="لینک یا آدرس لوکیشن" value="${escapeHtml(b.location||'')}">
+    <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">انصراف</button><button class="btn" onclick="saveBusinessInfo()">ذخیره</button></div>
+    <button class="btn" style="width:100%;margin-top:8px;" onclick="openBusinessSmsComposer()">مشاهده و ارسال پیامک اطلاعات سالن</button>`);
+}
+async function saveBusinessInfo(){
+  state.businessInfo={address:document.getElementById('fBizAddress').value.trim(),instagram:document.getElementById('fBizInstagram').value.trim(),phone:document.getElementById('fBizPhone').value.trim(),telegram:document.getElementById('fBizTelegram').value.trim(),location:document.getElementById('fBizLocation').value.trim()};
+  await storageSet('businessInfo',state.businessInfo); closeModal(); render(); showToast('اطلاعات سالن ذخیره شد ✓');
+}
+function businessInfoMessage(b=state.businessInfo||{}){
+  const lines=['اطلاعات سالن 🌸'];
+  if(b.address) lines.push(`آدرس: ${b.address}`);
+  if(b.instagram) lines.push(`اینستاگرام: ${b.instagram}`);
+  if(b.phone) lines.push(`شماره تماس: ${b.phone}`);
+  if(b.telegram) lines.push(`تلگرام: ${b.telegram}`);
+  if(b.location) lines.push(`لوکیشن: ${b.location}`);
+  return lines.join('\n');
+}
+function openBusinessSmsComposer(){
+  const msg=businessInfoMessage();
+  openModal(`<h3>پیامک اطلاعات سالن</h3><textarea id="fBizSms" rows="9">${escapeHtml(msg)}</textarea><div class="modal-actions"><button class="btn ghost" onclick="closeModal()">بستن</button><button class="btn" onclick="sendBusinessSms()">ارسال پیامک</button></div>`);
+}
+function sendBusinessSms(){
+  const msg=document.getElementById('fBizSms').value.trim();
+  if(!msg){showToast('پیام خالی است');return;}
+  const url='sms:?body='+encodeURIComponent(msg);
+  closeModal(); window.location.href=url;
+}
+
+function renderMore(main){
+  const items = [
+    { tab:'services', label:'خدمات و قیمت‌ها', desc:'مدیریت خدمات و قیمت هرکدوم',
+      icon:'<path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/>' },
+    { tab:'offers', label:'افر و معرفی', desc:'افرهای ویژه و برنامه معرفی مشتری',
+      icon:'<path d="M20 12l-8 8-9-9V4h7z"/><circle cx="7.5" cy="7.5" r="1.5"/>' },
+    { tab:'occasions', label:'مناسبت‌ها', desc:'تولد مشتری‌ها و مناسبت‌های شغلی',
+      icon:'<path d="M12 2l1.5 4.5H18l-3.6 2.8 1.4 4.7-3.8-2.9-3.8 2.9 1.4-4.7L6 6.5h4.5z"/><circle cx="12" cy="19" r="2"/>' },
+    { tab:'materials', label:'مواد اولیه', desc:'ثبت خرید و روند قیمت مواد',
+      icon:'<path d="M9 2v6L4 20a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2L15 8V2"/><path d="M9 2h6M6 15h12"/>' },
+    { tab:'reports', label:'گزارش مالی', desc:'درآمد، هزینه و سود ماهانه',
+      icon:'<path d="M4 20V10M12 20V4M20 20v-7"/>' },
+    { action:'businessInfo', label:'اطلاعات سالن', desc:'آدرس، اینستاگرام، تماس، تلگرام و لوکیشن',
+      icon:'<path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.2"/><path d="M3 21h18"/>' },
+    { action:'backup', label:'پشتیبان‌گیری و انتقال اطلاعات', desc:'خروجی JSON و بازیابی اطلاعات روی گوشی دیگر',
+      icon:'<path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6h14v-6"/>' },
+    { action:'smsSettings', label:'متن پیامک‌ها', desc:'متن آماده تبریک تولد و مناسبت‌ها',
+      icon:'<path d="M4 5h16v11H7l-3 3V5z"/><path d="M8 9h8M8 12h5"/>' }
+  ];
+  main.innerHTML = `<div class="section-title">سایر بخش‌ها</div><div class="card" id="moreList"></div>`;
+  document.getElementById('moreList').innerHTML = items.map(it=>`
+    <div class="more-item" onclick="${it.action==='smsSettings'?'openSmsSettingsForm()':it.action==='backup'?'openBackupPanel()':it.action==='businessInfo'?'openBusinessInfoForm()':`setTab('${it.tab}')`}">
+      <div class="more-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${it.icon}</svg></div>
+      <div style="flex:1;"><div class="name">${it.label}</div><div class="desc">${it.desc}</div></div>
+    </div>`).join('');
+}
+
+function openBackupPanel(){
+  openModal(`<h3>پشتیبان‌گیری و انتقال اطلاعات</h3><p class="muted" style="line-height:1.9;margin-top:8px">از اطلاعات برنامه یک فایل پشتیبان بگیر و فایل را به گوشی جدید منتقل کن. در گوشی جدید همین گزینه را بزن و فایل را بازیابی کن.</p><div class="backup-row"><button class="btn" onclick="exportBackup()">⬇️ دریافت فایل JSON</button><button class="btn ghost" onclick="importBackup()">⬆️ انتخاب فایل JSON و بازیابی</button></div><p class="muted" style="margin-top:10px;line-height:1.8;">فایل بکاپ را می‌توانی با بلوتوث، واتساپ، تلگرام یا هر روش دیگری به گوشی جدید منتقل کنی.</p>`);
+}
+function renderHome(main){
+  const today = todayIso();
+  const todays = state.appointments.filter(a=>a.date===today && a.status!=='cancelled').sort((a,b)=>a.time.localeCompare(b.time));
+  const upcomingCount = state.appointments.filter(a=>a.date>=today && a.status==='upcoming').length;
+  const withVisits = state.customers.filter(c=>lastVisitIso(c.id));
+  const mid = withVisits.filter(c=>{ const d=daysSinceLastVisit(c.id); return d>=30 && d<40; }).length;
+  const hot = withVisits.filter(c=>daysSinceLastVisit(c.id)>=40).length;
+  const smartFollowups = smartFollowupCustomers().slice(0,5);
+  const birthdaysSoon = upcomingBirthdays(7).filter(x=>isBirthdayUnread(x.c));
+  const occasionsSoon = upcomingOccasions(7).filter(x=>isOccasionUnread(x.o));
+  const offersSoon = state.notifications.filter(n=>!n.read&&n.type==='offer').slice(0,5);
+
+  main.innerHTML = `
+    ${renderRomanceCard()}
+    <div class="stat-row home-stats">
+      <div class="stat"><div class="num">${state.customers.length}</div><div class="lbl">مشتری</div></div>
+      <div class="stat"><div class="num">${todays.length}</div><div class="lbl">وقت امروز</div></div>
+      <div class="stat"><div class="num">${upcomingCount}</div><div class="lbl">وقت آینده</div></div>
+    </div>
+    ${(mid>0 || hot>0 || smartFollowups.length>0) ? `
+      <div class="section-title">پیگیری هوشمند مشتری‌ها</div>
+      ${smartFollowups.length ? `<div class="card"><div class="sub" style="line-height:1.8;margin-bottom:8px;">بر اساس میانگین مراجعه هر مشتری، این افراد احتمالاً وقت پیگیری‌شان رسیده.</div>${smartFollowups.map(x=>`<div class="list-item" onclick="openCustomerDetail('${x.c.id}')" style="cursor:pointer;"><div><div class="name">${escapeHtml(x.c.name)}</div><div class="sub">معمولاً هر ${toFa(x.avgGap)} روز · الان ${toFa(x.days)} روز گذشته</div></div><span class="badge days-hot">${toFa(x.overdue)} روز دیرتر</span></div>`).join('')}</div>` : ''}
+      ${mid>0 ? `<div class="alert-card mid" onclick="goToCustomersFilter('30')"><span>مشتری‌هایی که بیش از ۳۰ روزه مراجعه نکردن</span><span class="n">${toFa(mid)}</span></div>` : ''}
+      ${hot>0 ? `<div class="alert-card hot" onclick="goToCustomersFilter('40')"><span>مشتری‌هایی که بیش از ۴۰ روزه مراجعه نکردن</span><span class="n">${toFa(hot)}</span></div>` : ''}
+    ` : ''}
+    ${(birthdaysSoon.length>0 || occasionsSoon.length>0 || offersSoon.length>0) ? `
+      <div class="section-title">یادآوری‌های نزدیک</div>
+      <div class="card">
+        ${birthdaysSoon.map(x=>`
+          <div class="list-item">
+            <div class="row"><div class="avatar">${x.c.name.slice(0,1)}</div><div><div class="name">${escapeHtml(x.c.name)}</div><div class="sub">${x.days===0?'تولدشه امروز 🎂':'تا تولدش '+toFa(x.days)+' روز مونده'}</div></div></div>
+            <div style="display:flex;align-items:center;gap:5px;"><span class="item-dot" style="${isBirthdayUnread(x.c)?'':'display:none;'}"></span><div style="display:flex;gap:5px;align-items:center;">
+              <button class="btn small ghost" onclick="openBirthdaySms('${x.c.id}')">ارسال پیامک تبریک</button>
+              <button class="btn small ghost" onclick="dismissBirthday('${x.c.id}')">انجام شد ✓</button>
+            </div></div>
+          </div>`).join('')}
+        ${offersSoon.map(n=>{const c=state.customers.find(x=>x.id===n.actionId);return `<div class="list-item"><div><div class="name"><span class="item-dot"></span>🎁 ${escapeHtml(c?.name||'مشتری')}</div><div class="sub">${escapeHtml(n.text)}</div></div><button class="btn small ghost" onclick="handleNotificationClick('${n.id}')">مشاهده افر</button></div>`}).join('')}
+        ${occasionsSoon.map(x=>`
+          <div class="list-item">
+            <div><div class="name">${escapeHtml(x.o.title)}</div><div class="sub">${x.days===0?'امروزه':toFa(x.days)+' روز مونده'}</div></div>
+            <div style="display:flex;align-items:center;gap:5px;"><span class="item-dot" style="${isOccasionUnread(x.o)?'':'display:none;'}"></span><div style="display:flex;gap:5px;align-items:center;">
+              <button class="btn small ghost" onclick="openOccasionDetail('${x.o.id}')">مشاهده</button>
+              <button class="btn small ghost" onclick="dismissOccasion('${x.o.id}')">انجام شد ✓</button>
+            </div></div>
+          </div>`).join('')}
+      </div>
+    ` : ''}
+    <div class="section-title">نوبت‌های امروز — ${formatJalali(today, true)}</div>
+    <div id="todayList"></div>
+  `;
+  const list = document.getElementById('todayList');
+  list.innerHTML = todays.length===0
+    ? `<div class="empty"><div class="big">💅</div>برای امروز نوبتی ثبت نشده</div>`
+    : `<div class="card">` + todays.map(a=>appointmentRow(a)).join('') + `</div>`;
+}
+function goToCustomersFilter(f){
+  state.custFilter = f;
+  setTab('customers');
+}
+
+function appointmentRow(a){
+  const c=state.customers.find(c=>c.id===a.customerId),name=c?c.name:(a.customerName||'مشتری حذف‌شده'),fin=apptFinance(a);const unreadAppt=state.notifications.some(n=>!n.read&&n.type==='appointment'&&n.actionId===a.id);const bc=a.status==='done'?'done':a.status==='cancelled'?'cancelled':'upcoming',bt=a.status==='done'?'انجام‌شد':a.status==='cancelled'?'کنسل':a.time;
+  return `<div class="list-item ${customerType(c)==='salon'?'customer-salon-row':'customer-me-row'}"><div class="row"><div class="avatar">${(name||'?').slice(0,1)}</div><div><div class="name">${escapeHtml(name)}</div><span class="customer-owner-badge ${ownerClass(c)}">${ownerLabel(c)}</span><div class="sub">${escapeHtml(a.serviceName||'')} · ${fmtPrice(fin.total)}</div></div></div><div style="display:flex;align-items:center;gap:6px;"><span class="badge ${bc}">${bt}</span>${unreadAppt?'<span class="item-dot"></span>':''}<button class="btn small ghost" onclick="openAppointmentActions('${a.id}')">⋯</button></div></div>`;
+}
+function renderAppointments(main){
+ const jy=state.apptJY,jm=state.apptJM,mo=FA_MONTHS.map((n,i)=>`<option value="${i+1}" ${i+1===jm?'selected':''}>${n}</option>`).join('');const curY=todayJalali()[0];let yo='';for(let y=curY-5;y<=curY+5;y++)yo+=`<option value="${y}" ${y===jy?'selected':''}>${toFa(y)}</option>`;const inM=a=>{const[y,m]=isoToJalali(a.date);return y===jy&&m===jm};let items=state.appointments.filter(inM);if(state.apptSelectedDate)items=items.filter(a=>a.date===state.apptSelectedDate);items.sort((a,b)=>{const x=a.date+' '+a.time,y=b.date+' '+b.time;return state.apptSort==='newest'?y.localeCompare(x):x.localeCompare(y)});const groups={};items.forEach(a=>(groups[a.date]??=[]).push(a));const dates=Object.keys(groups).sort((a,b)=>state.apptSort==='newest'?b.localeCompare(a):a.localeCompare(b));main.innerHTML=`<div class="section-title"><span>نوبت‌ها</span><span class="muted">${toFa(items.length)} نوبت</span></div><div class="datesel" style="margin-bottom:10px;"><select id="apptMonth">${mo}</select><select id="apptYear">${yo}</select></div><div class="appt-filter-row"><button class="chip ${state.apptSort==='newest'?'active':''}" id="apptNewest">جدید به قدیم</button><button class="chip ${state.apptSort==='oldest'?'active':''}" id="apptOldest">قدیم به جدید</button>${state.apptSelectedDate?`<button class="chip active" id="clearApptDate">فقط ${formatJalaliShort(state.apptSelectedDate)} ✕</button>`:''}</div><div id="apptList"></div>`;document.getElementById('apptList').innerHTML=dates.length?dates.map(d=>`<div class="section-title" style="font-size:12.5px;color:var(--muted);margin-top:10px;">${formatJalali(d,true)} <span class="muted">· ${toFa(groups[d].length)}</span></div><div class="card">${groups[d].map(appointmentRow).join('')}</div>`).join(''):`<div class="empty"><div class="big">📅</div>برای این ماه نوبتی ثبت نشده</div>`;document.getElementById('apptMonth').onchange=e=>{state.apptJM=+e.target.value;state.apptSelectedDate=null;render()};document.getElementById('apptYear').onchange=e=>{state.apptJY=+e.target.value;state.apptSelectedDate=null;render()};document.getElementById('apptNewest').onclick=()=>{state.apptSort='newest';render()};document.getElementById('apptOldest').onclick=()=>{state.apptSort='oldest';render()};const clr=document.getElementById('clearApptDate');if(clr)clr.onclick=()=>{state.apptSelectedDate=null;render()};
+}
+function renderCalendar(main){
+ const jy=state.calendarJY,jm=state.calendarJM,dim=daysInJalaaliMonth(jy,jm),firstIso=isoFromParts(...toGregorian(jy,jm,1)),firstWd=(new Date(firstIso+'T00:00:00').getDay()+1)%7;const mo=FA_MONTHS.map((n,i)=>`<option value="${i+1}" ${i+1===jm?'selected':''}>${n}</option>`).join('');const curY=todayJalali()[0];let yo='';for(let y=curY-10;y<=curY+10;y++)yo+=`<option value="${y}" ${y===jy?'selected':''}>${toFa(y)}</option>`;const weeks=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];let cells='';for(let i=0;i<firstWd;i++)cells+='<div class="cal-day empty"></div>';for(let d=1;d<=dim;d++){const iso=isoFromParts(...toGregorian(jy,jm,d)),ap=state.appointments.filter(a=>a.date===iso&&a.status!=='cancelled').length,unreadDay=state.notifications.some(n=>!n.read&&n.type==='appointment'&&state.appointments.some(a=>a.id===n.actionId&&a.date===iso)),info=holidayInfo(jy,jm,d),isFri=((firstWd+d-1)%7)===6,isToday=iso===todayIso();cells+=`<div class="cal-day ${isFri?'friday':''} ${info?'holiday':''} ${isToday?'today':''}" onclick="openCalendarDay(${jy},${jm},${d})"><div class="dn">${toFa(d)}</div>${ap?`<span class="appt-count">${toFa(ap)}</span>`:''}${unreadDay?`<span class="item-dot" style="position:absolute;left:4px;bottom:4px;margin:0;"></span>`:''}${info?`<div class="holiday-mark" title="${escapeHtml(info)}">${escapeHtml(info)}</div>`:isFri?`<div class="holiday-mark">جمعه</div>`:''}</div>`}main.innerHTML=`<div class="section-title"><span>تقویم شمسی</span><span class="muted">${toFa(jy)}</span></div><div class="month-nav"><button class="btn ghost" id="calPrev">‹</button><select id="calMonth">${mo}</select><select id="calYear">${yo}</select><button class="btn ghost" id="calNext">›</button></div><div class="card"><div class="calendar-grid">${weeks.map(w=>`<div class="cal-week">${w}</div>`).join('')}${cells}</div><div class="calendar-legend"><span class="legend-item"><i class="legend-dot" style="background:#FDECEE"></i>تعطیل رسمی</span><span class="legend-item"><i class="legend-dot" style="background:#FFF1F3"></i>جمعه</span><span class="legend-item"><i class="legend-dot" style="background:var(--primary)"></i>روز دارای نوبت</span></div></div><div class="swipe-hint">روی هر روز بزن تا نوبت‌های همان روز نمایش داده شود</div>`;document.getElementById('calMonth').onchange=e=>{state.calendarJM=+e.target.value;render()};document.getElementById('calYear').onchange=e=>{state.calendarJY=+e.target.value;render()};document.getElementById('calPrev').onclick=()=>{[state.calendarJY,state.calendarJM]=monthMove(jy,jm,-1);render()};document.getElementById('calNext').onclick=()=>{[state.calendarJY,state.calendarJM]=monthMove(jy,jm,1);render()};
+}
+async function openCalendarDay(jy,jm,jd){const[gY,gM,gD]=toGregorian(jy,jm,jd),iso=isoFromParts(gY,gM,gD);const ids=state.notifications.filter(n=>!n.read&&n.type==='appointment'&&state.appointments.some(a=>a.id===n.actionId&&a.date===iso)).map(n=>n.id);for(const id of ids) await markNotificationRead(id);state.apptJY=jy;state.apptJM=jm;state.apptSelectedDate=iso;setTab('appointments');}
+
+function renderCustomers(main){
+  main.innerHTML = `
+    <input id="custSearch" placeholder="جستجوی مشتری با نام یا شماره..." style="margin-bottom:12px;" value="${escapeHtml(state.custSearchQuery||'')}">
+    <div class="chips" id="custChips">
+      <span class="chip ${state.custFilter==='all'?'active':''}" data-f="all">همه</span>
+      <span class="chip ${state.custFilter==='30'?'active':''}" data-f="30">۳۰+ روز بدون مراجعه</span>
+      <span class="chip ${state.custFilter==='40'?'active':''}" data-f="40">۴۰+ روز بدون مراجعه</span>
+    </div>
+    <div class="section-title">
+      مشتری‌ها <span class="muted">${state.customers.length} نفر</span>
+    </div>
+    <div style="margin-bottom:10px;">
+      <button class="chip ${state.custSort==='name'?'active':''}" id="sortName">مرتب‌سازی: نام</button>
+      <button class="chip ${state.custSort==='days'?'active':''}" id="sortDays">مرتب‌سازی: مدت از آخرین مراجعه</button>
+    </div>
+    <div id="custList"></div>
+  `;
+  document.getElementById('custSearch').addEventListener('input', e=>{
+    state.custSearchQuery = e.target.value; renderCustList(e.target.value);
+  });
+  document.getElementById('custChips').addEventListener('click', e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    state.custFilter = chip.dataset.f;
+    document.querySelectorAll('#custChips .chip').forEach(c=>c.classList.toggle('active', c.dataset.f===state.custFilter));
+    renderCustList(state.custSearchQuery||'');
+  });
+  document.getElementById('sortName').addEventListener('click', ()=>{
+    state.custSort='name';
+    document.getElementById('sortName').classList.add('active'); document.getElementById('sortDays').classList.remove('active');
+    renderCustList(state.custSearchQuery||'');
+  });
+  document.getElementById('sortDays').addEventListener('click', ()=>{
+    state.custSort='days';
+    document.getElementById('sortDays').classList.add('active'); document.getElementById('sortName').classList.remove('active');
+    renderCustList(state.custSearchQuery||'');
+  });
+  renderCustList(state.custSearchQuery||'');
+}
+function renderCustList(query){
+  const q = (query||'').trim();
+  let filtered = state.customers.filter(c=> c.name.includes(q) || (c.phone||'').includes(q));
+  if(state.custFilter==='30') filtered = filtered.filter(c=>{ const d=daysSinceLastVisit(c.id); return d!==null && d>=30 && d<40; });
+  if(state.custFilter==='40') filtered = filtered.filter(c=>{ const d=daysSinceLastVisit(c.id); return d!==null && d>=40; });
+  if(state.custSort==='name') filtered.sort((a,b)=>a.name.localeCompare(b.name,'fa'));
+  else filtered.sort((a,b)=>{
+    const da=daysSinceLastVisit(a.id), db=daysSinceLastVisit(b.id);
+    if(da===null && db===null) return 0; if(da===null) return 1; if(db===null) return -1;
+    return db-da;
+  });
+  const el = document.getElementById('custList');
+  if(filtered.length===0){
+    el.innerHTML = `<div class="empty"><div class="big">🙍‍♀️</div>${state.customers.length===0?'هنوز مشتری‌ای اضافه نکردی':'نتیجه‌ای پیدا نشد'}</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="card">` + filtered.map(c=>{
+    const days = daysSinceLastVisit(c.id);
+    const unreadFollowup=state.notifications.some(n=>!n.read&&n.type==='followup'&&n.actionId===c.id);
+    let daysBadge = '<span class="badge" style="background:#F3EBEA;color:var(--muted);">بدون مراجعه</span>';
+    if(days!==null){
+      const cls = days>=40 ? 'days-hot' : days>=30 ? 'days-mid' : 'days-ok';
+      daysBadge = `<span class="badge ${cls}">${toFa(days)} روز پیش</span>`;
+    }
+    return `
+      <div class="list-item ${customerType(c)==='salon'?'customer-salon-row':'customer-me-row'}" onclick="openCustomerDetail('${c.id}')" style="cursor:pointer;">
+        <div class="row">
+          <div class="avatar">${c.name.slice(0,1)}</div>
+          <div>
+            <div class="name">${unreadFollowup?'<span class="item-dot"></span>':''}${escapeHtml(c.name)}</div>
+            <div class="sub">${escapeHtml(c.phone||'بدون شماره')}</div>
+          </div>
+        </div>
+        ${daysBadge}
+      </div>`;
+  }).join('') + `</div>`;
+}
+
+function jalaliSearchToIso(value){
+  const raw = String(value||'').trim().replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[-.\s]+/g,'/');
+  const m = raw.match(/^(\d{4})[\/]?(\d{1,2})[\/]?(\d{1,2})$/);
+  if(!m) return null;
+  const jy=Number(m[1]), jm=Number(m[2]), jd=Number(m[3]);
+  if(jm<1 || jm>12 || jd<1 || jd>daysInJalaaliMonth(jy,jm)) return null;
+  const [gy,gm,gd]=toGregorian(jy,jm,jd);
+  return isoFromParts(gy,gm,gd);
+}
+
+
+function renderServices(main){
+  main.innerHTML = `<div class="section-title">خدمات و قیمت‌ها</div><div id="svcList"></div>`;
+  const el = document.getElementById('svcList');
+  if(state.services.length===0){ el.innerHTML = `<div class="empty"><div class="big">✨</div>هنوز خدمتی ثبت نشده</div>`; return; }
+  el.innerHTML = `<div class="card">` + state.services.map(s=>`
+    <div class="list-item">
+      <div style="flex:1;min-width:0;"><div class="name">${escapeHtml(s.name)}</div><div class="sub">${fmtPrice(s.price)} <span class="svc-mode-badge">${s.pricingMode==='quantity'?'تعدادی':'کلی'}</span>${s.isMain?' <span class="svc-mode-badge" style="background:#E7F3EC;color:var(--success);">خدمت اصلی</span>':''}</div></div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <button class="btn small ghost" onclick="openServiceForm('${s.id}')">ویرایش</button>
+        <button class="del-x" onclick="deleteService('${s.id}')">✕</button>
+      </div>
+    </div>`).join('') + `</div>`;
+}
+
+function offerUsed(customerId, offerId=null, kind='special'){
+  return state.offerUsage.some(u=>u.customerId===customerId && u.kind===kind && (kind==='special'?u.offerId===offerId:true) && !u.cancelled);
+}
+function markOfferDone(customerId, offerId=null, kind='special', title=''){
+  const c=state.customers.find(x=>x.id===customerId); if(!c) return;
+  const discount=referralDiscountFor(customerId);
+  const item={id:uid(),kind,customerId,offerId,discount:kind==='referral'?discount:null,title:title||'افر',date:todayIso(),doneAt:new Date().toISOString()};
+  state.offerUsage.push(item);
+  storageSet('offerUsage',state.offerUsage).then(()=>{syncNotifications();render();showToast('افر برای این مشتری انجام‌شده ثبت شد ✓');});
+}
+function openOfferCustomer(id, offerId=null){
+  const c=state.customers.find(x=>x.id===id); if(!c) return;
+  const offer=offerId?state.offers.find(x=>x.id===offerId):null;
+  openModal(`<h3>${escapeHtml(c.name)}</h3><span class="customer-owner-badge ${ownerClass(c)}">${ownerLabel(c)}</span><p class="sub" style="margin-top:8px;">${offer?`افر «${escapeHtml(offer.title)}» — ${escapeHtml(offer.discount)}`:`تخفیف معرفی — ${toFa(referralDiscountFor(c.id))}٪`}</p><div class="modal-actions"><button class="btn ghost" onclick="closeModal()">انصراف</button><button class="btn" onclick="markOfferDone('${c.id}',${offer?`'${offer.id}'`:'null'},'${offer?'special':'referral'}',${JSON.stringify(offer?offer.title:'تخفیف معرفی')})">افر را دادم ✓</button></div>`);
+}
+async function openReferralDetailFromNotification(notificationId, customerId){
+  if(notificationId) await markNotificationRead(notificationId);
+  return openReferralDetail(customerId);
+}
+async function openReferralDetail(customerId){
+  const unreadOffer=state.notifications.filter(n=>!n.read&&n.type==='offer'&&n.actionId===customerId);
+  for(const n of unreadOffer) await markNotificationRead(n.id);
+  const c=state.customers.find(x=>x.id===customerId); if(!c) return;
+  const referred=state.customers.filter(x=>x.referrerId===customerId);
+  const rows=referred.map(r=>{
+    const visits=customerVisits(r.id).length;
+    return `<div class="list-item"><div><div class="name">${escapeHtml(r.name)}</div><div class="sub">${toFa(visits)} مراجعه</div></div><span class="badge ${visits?'upcoming':''}">${visits?'فعال':'هنوز مراجعه نکرده'}</span></div>`;
+  }).join('');
+  openModal(`<h3>معرفی‌های ${escapeHtml(c.name)}</h3>
+    <p class="sub" style="margin-top:5px;">${toFa(referred.length)} نفر توسط این مشتری معرفی شده‌اند.</p>
+    <div class="card" style="margin-top:12px;">${rows||'<div class="empty">هنوز مشتری‌ای معرفی نشده</div>'}</div>
+    <div class="appt-finance" style="margin-top:12px;"><b>وضعیت افر</b><div class="sub" style="margin-top:5px;">${referralDiscountFor(c.id)>0?`مستحق ${toFa(referralDiscountFor(c.id))}٪ تخفیف معرفی است.`:'هنوز به حد نصاب افر نرسیده است.'}</div></div>
+    <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">بستن</button>${referralDiscountFor(c.id)>0&&!offerUsed(c.id,null,'referral')?`<button class="btn" onclick="markOfferDone('${c.id}',null,'referral','تخفیف معرفی')">افر را دادم ✓</button>`:''}</div>`);
+}
+
+function renderOffers(main){
+  const s = state.referralSettings;
+  const eligible=state.customers.filter(c=>referralDiscountFor(c.id)>0&&!offerUsed(c.id,null,'referral'));
+  const used=state.offerUsage.filter(u=>u.kind==='referral'&&!u.cancelled).slice().reverse().slice(0,12);
+  main.innerHTML=`
+    <div class="settings-card"><div class="row" style="justify-content:space-between;"><div><div style="font-weight:700;font-size:13px;">برنامه معرفی مشتری</div><div class="sub" style="margin-top:4px;">هر <b>${toFa(s.perReferrals)}</b> معرفی موفق = <b>${toFa(s.discountPercent)}٪</b> تخفیف</div></div><button class="btn small ghost" onclick="openReferralSettingsForm()">ویرایش</button></div></div>
+    <div class="section-title">🎁 افرهای نیاز به انجام</div>
+    <div class="card">${eligible.length?eligible.map(c=>`<div class="list-item"><div class="row"><div class="avatar">${c.name.slice(0,1)}</div><div><div class="name"><span class="item-dot"></span>${escapeHtml(c.name)}</div><div class="sub">${toFa(referralCount(c.id))} معرفی · ${toFa(referralDiscountFor(c.id))}٪ تخفیف</div></div></div><div class="row" style="gap:6px;"><button class="btn small ghost" onclick="openReferralDetail('${c.id}')">مشاهده</button><button class="btn small" onclick="markOfferDone('${c.id}',null,'referral','تخفیف معرفی')">انجام شد ✓</button></div></div>`).join(''):'<div class="empty">افر معرفیِ جدیدی برای انجام وجود ندارد</div>'}</div>
+    <div class="section-title" style="margin-top:16px;">افرهای ویژه</div><div id="offList"></div>
+    ${used.length?`<div class="section-title" style="margin-top:16px;">افرهای انجام‌شده</div><div class="card">${used.map(u=>{const c=state.customers.find(x=>x.id===u.customerId);return `<div class="list-item"><div><div class="name">${escapeHtml(c?.name||'مشتری')}</div><div class="sub">${escapeHtml(u.title||'تخفیف معرفی')} · ${formatJalaliShort(u.date)}</div></div><span class="badge done">انجام شد ✓</span></div>`}).join('')}</div>`:''}`;
+  const el=document.getElementById('offList');
+  if(!state.offers.length){el.innerHTML='<div class="empty"><div class="big">🏷️</div>هنوز افر ویژه‌ای ثبت نشده</div>';return;}
+  el.innerHTML=state.offers.map(o=>{
+    const assigned=state.customers.filter(c=>o.customerId===c.id&&!offerUsed(c.id,o.id,'special'));
+    return `<div class="card offer-card"><div class="row" style="justify-content:space-between;align-items:flex-start;"><div><div class="name">${escapeHtml(o.title)}</div><div class="sub" style="margin-top:4px;">${escapeHtml(o.desc||'')}</div>${o.validUntil?`<div class="sub">تا ${formatJalaliShort(o.validUntil)}</div>`:''}</div><div style="text-align:left;"><div class="discount">${escapeHtml(o.discount)}</div><button class="del-x" onclick="deleteOffer('${o.id}')">✕</button></div></div>${assigned.length?`<div style="margin-top:10px;">${assigned.map(c=>`<div class="list-item"><div><div class="name"><span class="item-dot"></span>${escapeHtml(c.name)}</div><div class="sub">این افر هنوز انجام نشده</div></div><button class="btn small" onclick="openOfferCustomer('${c.id}','${o.id}')">انجام شد ✓</button></div>`).join('')}</div>`:'<div class="sub" style="margin-top:10px;">برای مشتری مشخصی فعال نشده</div>'}</div>`;
+  }).join('');
+}
+function renderOccasions(main){
+  const list = state.occasions.map(o=>({o, next: nextOccasionDate(o)})).filter(x=>x.next);
+  list.sort((a,b)=> a.next.localeCompare(b.next));
+  const birthdays = upcomingBirthdays(7).slice(0,30);
+  main.innerHTML = `
+    <div class="section-title">مناسبت‌ها و تولدها</div>
+    <div id="occList"></div>
+    <p class="muted" style="margin-top:14px; line-height:1.9;">با ورود به این بخش، مناسبت‌های جدید را می‌بینی؛ دایره قرمز کنار هر مورد یعنی هنوز آن مورد را ندیده‌ای. با باز کردن مورد، علامت آن برداشته می‌شود.</p>
+  `;
+  const el = document.getElementById('occList');
+  const occHtml = list.map(({o,next})=>{
+    const days=daysBetween(todayIso(),next), matched=matchedCustomersForOccasion(o);
+    const badgeClass=days<=7?'days-hot':days<=30?'days-mid':'days-ok';
+    return `<div class="list-item" onclick="openOccasionDetail('${o.id}')" style="cursor:pointer;">
+      <div><div class="name">${isOccasionUnread(o)?'<span class="item-dot"></span>':''}${escapeHtml(o.title)}</div>
+      <div class="sub">${formatJalaliShort(next)} ${matched.length?'· '+toFa(matched.length)+' مشتری مرتبط':''}</div></div>
+      <span class="badge ${badgeClass}">${days===0?'امروز':toFa(days)+' روز مانده'}</span>
+    </div>`;
+  }).join('');
+  const birthdayHtml = birthdays.map(x=>`
+    <div class="list-item">
+      <div><div class="name">${isBirthdayUnread(x.c)?'<span class="item-dot"></span>':''}🎂 ${escapeHtml(x.c.name)}</div>
+      <div class="sub">${x.days===0?'تولدشه امروز 🎉':'تا تولد '+toFa(x.days)+' روز'}</div></div>
+      <div style="display:flex;gap:5px;align-items:center;">${isBirthdayUnread(x.c)?'<span class="item-dot"></span>':''}<button class="btn small ghost" onclick="openBirthdaySms('${x.c.id}')">مشاهده / پیامک</button></div>
+    </div>`).join('');
+  el.innerHTML = (occHtml || birthdayHtml)
+    ? `<div class="card">${occHtml}${birthdayHtml ? '<div class="section-title" style="margin-top:12px;">تولد مشتری‌ها</div>'+birthdayHtml : ''}</div>`
+    : `<div class="empty"><div class="big">🎉</div>مناسبتی ثبت نشده</div>`;
+}
+
+function renderMaterials(main){
+  main.innerHTML = `<div class="section-title">مواد اولیه — تاریخچه خرید و قیمت</div><div id="matList"></div>`;
+  const el = document.getElementById('matList');
+  if(state.materials.length===0){ el.innerHTML = `<div class="empty"><div class="big">🧴</div>هنوز خریدی ثبت نشده</div>`; return; }
+  const grouped = {};
+  state.materials.forEach(m=>{ (grouped[m.name] = grouped[m.name]||[]).push(m); });
+  const names = Object.keys(grouped).sort((a,b)=>a.localeCompare(b,'fa'));
+  el.innerHTML = names.map(name=>{
+    const list = grouped[name].sort((a,b)=>b.date.localeCompare(a.date));
+    return `
+      <div class="section-title" style="font-size:13px; margin-top:14px;">${escapeHtml(name)}</div>
+      <div class="card">${list.map(m=>`
+        <div class="list-item">
+          <div>
+            <div class="name" style="font-size:12.5px;">${formatJalaliShort(m.date)} — ${fmtPrice(m.price)}</div>
+            ${m.customersServed ? `<div class="sub">برای ${toFa(m.customersServed)} مشتری کافیه · هر مشتری ${fmtPrice(Math.round(m.price/m.customersServed))}</div>` : ''}
+          </div>
+          <button class="del-x" onclick="deleteMaterial('${m.id}')">✕</button>
+        </div>`).join('')}</div>`;
+  }).join('');
+}
+
+function monthlyServiceCounts(jy){
+  const result=[];
+  for(let m=1;m<=12;m++){
+    const counts={};
+    state.appointments.filter(a=>a.status==='done').forEach(a=>{
+      const [ay,am]=isoToJalali(a.date);
+      if(ay!==jy || am!==m) return;
+      const svcs=(a.services&&a.services.length)?a.services:[{name:a.serviceName||'نامشخص'}];
+      svcs.forEach(s=>{
+        const name=s.name||'نامشخص';
+        counts[name]=(counts[name]||0)+1;
+      });
+    });
+    result.push({month:m, counts});
+  }
+  return result;
+}
+function renderServiceSummary(jy){
+  const rows=monthlyServiceCounts(jy);
+  return `<div class="section-title" style="margin-top:18px;">تعداد خدمات انجام‌شده در سال ${toFa(jy)}</div>
+    <div class="card">
+      ${rows.map(r=>{
+        const entries=Object.entries(r.counts).sort((a,b)=>b[1]-a[1]);
+        return `<div class="list-item"><div class="name">${FA_MONTHS[r.month-1]}</div><div class="sub" style="text-align:left;">${entries.length?entries.map(([name,n])=>`<span style="display:inline-block;margin-right:8px;">${escapeHtml(name)} <b>${toFa(n)}</b></span>`).join(''): '<span class="muted">خدمتی ثبت نشده</span>'}</div></div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderReports(main){
+  const jy=state.reportJY,jm=state.reportJM,mo=FA_MONTHS.map((n,i)=>`<option value="${i+1}" ${i+1===jm?'selected':''}>${n}</option>`).join(''),curY=todayJalali()[0];let yo='';for(let y=curY-5;y<=curY+5;y++)yo+=`<option value="${y}" ${y===jy?'selected':''}>${toFa(y)}</option>`;
+  const inM=iso=>{const[y,m]=isoToJalali(iso);return y===jy&&m===jm};
+  const visits=state.appointments.filter(a=>a.status==='done'&&inM(a.date));
+  const discounts=roundMoney(visits.reduce((s,a)=>s+(Number(a.discountAmount)||0),0));
+  const grossBeforeDiscount=roundMoney(visits.reduce((s,a)=>s+(Number(a.grossPrice)!=null?Number(a.grossPrice):Number(a.price)||0),0));
+  const gross=roundMoney(visits.reduce((s,a)=>s+(Number(a.price)||0),0));
+  const salonIncome=roundMoney(visits.reduce((s,a)=>s+apptFinance(a).salon,0)),myIncome=roundMoney(gross-salonIncome);
+  const salonCustomers=new Set(visits.filter(a=>customerType(state.customers.find(c=>c.id===a.customerId))==='salon').map(a=>a.customerId)).size;
+  const ownCustomers=new Set(visits.filter(a=>customerType(state.customers.find(c=>c.id===a.customerId))==='me').map(a=>a.customerId)).size;
+  const newCustomers=new Set(visits.filter(a=>isNewCustomerInMonth(a.customerId,jy,jm)).map(a=>a.customerId)).size;
+  const materialCost=roundMoney(state.materials.filter(m=>inM(m.date)).reduce((s,m)=>s+(+m.price||0),0)),exps=state.expenses.filter(e=>inM(e.date)),rent=roundMoney(exps.filter(e=>e.category==='rent').reduce((s,e)=>s+(+e.amount||0),0)),tools=roundMoney(exps.filter(e=>e.category==='tools').reduce((s,e)=>s+(+e.amount||0),0)),other=roundMoney(exps.filter(e=>e.category==='other').reduce((s,e)=>s+(+e.amount||0),0)),costs=roundMoney(materialCost+rent+tools+other),net=roundMoney(myIncome-costs);
+  const counts={};
+  visits.forEach(a=>(a.services&&a.services.length?a.services:[{name:a.serviceName||'نامشخص',quantity:1}]).forEach(x=>{const svc=state.services.find(s=>s.id===x.serviceId||s.name===x.name);if(svc&&svc.isMain)counts[svc.name]=(counts[svc.name]||0)+(+x.quantity||1);}));
+  const rows=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`<div class="list-item"><span class="name">${escapeHtml(n)}</span><span class="badge upcoming">${toFa(c)} بار</span></div>`).join('');
+  main.innerHTML=`<div class="section-title">گزارش مالی ماهانه</div><div class="datesel" style="margin-bottom:12px;"><select id="repMonth">${mo}</select><select id="repYear">${yo}</select></div>
+  <div class="report-mini-grid report-customer-grid">
+    <div class="report-mini"><div class="num">${toFa(visits.length)}</div><div class="lbl">تعداد مراجعات</div></div>
+    <div class="report-mini"><div class="num">${toFa(salonCustomers)}</div><div class="lbl">مشتری سالن</div></div>
+    <div class="report-mini"><div class="num">${toFa(ownCustomers)}</div><div class="lbl">مشتری خودم</div></div>
+    <div class="report-mini"><div class="num">${toFa(newCustomers)}</div><div class="lbl">مشتری جدید</div></div>
+  </div>
+  <div class="report-finance-card report-finance-wide" style="background:#E7F3EC;"><div class="num" style="color:var(--success);">${fmtPrice(grossBeforeDiscount)}</div><div class="lbl">فروش کل</div></div>
+  <div class="report-finance-grid">
+    <div class="report-finance-card" style="background:#DFF2E5;"><div class="num" style="color:#34865C;">${fmtPrice(gross)}</div><div class="lbl">فروش بعد از تخفیف</div></div>
+    <div class="report-finance-card" style="background:#FFF3CC;"><div class="num" style="color:#A87A18;">${fmtPrice(discounts)}</div><div class="lbl">میزان تخفیف</div></div>
+  </div>
+  <div class="report-finance-grid">
+    <div class="report-finance-card" style="background:#FBEAEC;"><div class="num" style="color:var(--danger);">${fmtPrice(costs)}</div><div class="lbl">جمع هزینه‌ها</div></div>
+    <div class="report-finance-card" style="background:#FBEAEC;"><div class="num" style="color:var(--danger);">${fmtPrice(salonIncome)}</div><div class="lbl">سهم سالن</div></div>
+  </div>
+  <div class="report-finance-card report-finance-profit" style="background:#F0E8FF;"><div class="num" style="color:#7C3AED;">${fmtPrice(net)}</div><div class="lbl">سود خالص</div></div>
+  <div class="section-title">ریز هزینه‌ها</div><div class="card"><div class="list-item"><span>مواد اولیه</span><b>${fmtPrice(materialCost)}</b></div><div class="list-item"><span>اجاره</span><b>${fmtPrice(rent)}</b></div><div class="list-item"><span>ابزار</span><b>${fmtPrice(tools)}</b></div><div class="list-item"><span>سایر</span><b>${fmtPrice(other)}</b></div><div class="total-row"><span>مجموع هزینه</span><span>${fmtPrice(costs)}</span></div></div>
+  <div class="section-title">خدمات اصلی این ماه</div><div class="card">${rows||'<div class="empty">خدمت اصلیِ انجام‌شده‌ای ثبت نشده</div>'}</div><div class="section-title">هزینه‌های ثبت‌شده</div><div id="expList"></div>`;
+  document.getElementById('repMonth').onchange=e=>{state.reportJM=+e.target.value;render()};document.getElementById('repYear').onchange=e=>{state.reportJY=+e.target.value;render()};document.getElementById('expList').innerHTML=exps.length?`<div class="card">${exps.map(e=>`<div class="list-item"><div><div class="name">${escapeHtml(e.title)}</div><div class="sub">${categoryLabel(e.category)} · ${formatJalaliShort(e.date)}</div></div><div><span class="sub">${fmtPrice(e.amount)}</span><button class="del-x" onclick="deleteExpense('${e.id}')">✕</button></div></div>`).join('')}</div>`:'<div class="empty">هزینه‌ای برای این ماه ثبت نشده</div>';
+}
+function categoryLabel(c){ return c==='rent' ? 'اجاره' : c==='tools' ? 'ابزار' : 'سایر'; }
+
+/* ============ Navigation ============ */
+document.getElementById('bottomNav').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  setTab(btn.dataset.tab);
+});
+document.getElementById('fabBtn').addEventListener('click', ()=>{
+  if(state.tab==='customers') return openCustomerForm();
+  if(state.tab==='appointments' || state.tab==='home') return openAppointmentForm();
+  if(state.tab==='services') return openServiceForm();
+  if(state.tab==='offers') return openOfferForm();
+  if(state.tab==='occasions') return openOccasionForm();
+  if(state.tab==='materials') return openMaterialForm();
+  if(state.tab==='reports') return openExpenseForm();
+});
+
+/* ============ Modal helpers ============ */
+let modalHistoryOpen=false;
+function openModal(html){
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  if(!handlingPopState && !modalHistoryOpen){
+    modalHistoryOpen=true;
+    history.pushState({nailapp:true,tab:state.tab,modal:true},'',location.href);
+  }
+}
+function closeModal(skipHistory=false){
+  document.getElementById('modalOverlay').classList.remove('open');
+  if(skipHistory) return;
+  if(modalHistoryOpen){
+    modalHistoryOpen=false;
+    if(!handlingPopState) history.back();
+  }
+}
+document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
+
+/* ============ Customer form ============ */
+function openCustomerForm(id){
+ const c=id?state.customers.find(x=>x.id===id):null,others=state.customers.filter(x=>x.id!==id),refs=others.map(x=>`<option value="${x.id}" ${c&&c.referrerId===x.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('');const jobs=[...new Set(state.customers.map(x=>x.job).filter(Boolean))];
+ openModal(`<h3>${c?'ویرایش مشتری':'مشتری جدید'}</h3><label>نام مشتری</label><input id="fName" value="${c?escapeHtml(c.name):''}"><label>شماره تماس</label><input type="tel" id="fPhone" value="${c?escapeHtml(c.phone||''):''}"><label>مالکیت مشتری</label><select id="fOwner"><option value="me" ${!c||customerType(c)==='me'?'selected':''}>💜 مشتری خودم</option><option value="salon" ${c&&customerType(c)==='salon'?'selected':''}>💚 مشتری سالن</option></select><label>شغل (اختیاری)</label><input id="fJob" list="jobList" value="${c?escapeHtml(c.job||''):''}"><datalist id="jobList">${jobs.map(j=>`<option value="${escapeHtml(j)}">`).join('')}</datalist><label style="display:flex;align-items:center;gap:6px;font-weight:400;margin-top:12px;"><input type="checkbox" id="fHasBirth" style="width:auto;" ${c&&c.birthDate?'checked':''}>تاریخ تولدش رو می‌دونم</label><div id="birthDateWrap" style="margin-top:6px;${c&&c.birthDate?'':'display:none;'}">${jalaliDateSelectsHtml('fBirth',c&&c.birthDate?c.birthDate:null,80,0)}</div><label>توسط چه کسی معرفی شده؟</label><select id="fReferrer"><option value="">— هیچکدام —</option>${refs}</select><label>یادداشت</label><textarea id="fNotes" rows="3">${c?escapeHtml(c.notes||''):''}</textarea><div class="modal-actions"><button class="btn ghost" onclick="closeModal()">انصراف</button><button class="btn" onclick="saveCustomer('${c?c.id:''}')">ذخیره</button></div>`);document.getElementById('fHasBirth').addEventListener('change',e=>document.getElementById('birthDateWrap').style.display=e.target.checked?'':'none');
+}
+async function saveCustomer(id){const name=document.getElementById('fName').value.trim(),phone=document.getElementById('fPhone').value.trim(),ownerType=document.getElementById('fOwner').value,job=document.getElementById('fJob').value.trim(),notes=document.getElementById('fNotes').value.trim(),referrerId=document.getElementById('fReferrer').value||null,hasBirth=document.getElementById('fHasBirth').checked,birthDate=hasBirth?getIsoFromJalaliSelects('fBirth'):null;if(!name){showToast('نام مشتری را وارد کن');return;}if(id){Object.assign(state.customers.find(x=>x.id===id),{name,phone,ownerType,job,notes,referrerId,birthDate});}else state.customers.push({id:uid(),name,phone,ownerType,job,notes,referrerId,birthDate,createdAt:todayIso()});await storageSet('customers',state.customers);syncNotifications();closeModal();render();showToast('ذخیره شد');}
+
+async function deleteCustomer(id){
+  state.customers = state.customers.filter(c=>c.id!==id);
+  state.customers.forEach(c=>{ if(c.referrerId===id) c.referrerId=null; });
+  await storageSet('customers', state.customers);
+  closeModal(true); modalHistoryOpen=false; state.tab='customers'; history.replaceState({nailapp:true,tab:'customers'},'',location.href); render(); showToast('مشتری حذف شد');
+}
+function openCustomerDetail(id){
+  const c = state.customers.find(x=>x.id===id);
+  if(!c) return;
+  const stats = customerStats(id);
+  const referrer = c.referrerId ? state.customers.find(x=>x.id===c.referrerId) : null;
+  const refCount = referralCount(id);
+  const refDiscount = referralDiscountFor(id);
+  const days = daysSinceLastVisit(id);
+  const bDaysUntil = daysUntilNextBirthday(c.birthDate);
+  const age = ageFromBirth(c.birthDate);
+  const svcRows = Object.entries(stats.servicesCount).sort((a,b)=>b[1]-a[1])
+    .map(([n,c])=>`<div class="list-item"><span class="sub">${escapeHtml(n)}</span><span class="badge upcoming">${toFa(c)} بار</span></div>`).join('');
+
+  openModal(`
+    <h3>${escapeHtml(c.name)}</h3>
+    <p class="muted" style="margin-top:2px;">${escapeHtml(c.phone||'بدون شماره')} ${c.job?'· '+escapeHtml(c.job):''}</p><span class="customer-owner-badge ${ownerClass(c)}">${ownerLabel(c)}</span>
+    ${c.birthDate ? `<p class="sub" style="margin-top:4px;">🎂 ${formatJalaliShort(c.birthDate)} ${age!==null?'('+toFa(age)+' ساله)':''} ${bDaysUntil!==null?'— '+(bDaysUntil===0?'تولدشه امروز!':toFa(bDaysUntil)+' روز تا تولدش'):''}</p>` : ''}
+    ${c.notes ? `<p class="sub" style="margin-top:8px;">📝 ${escapeHtml(c.notes)}</p>` : ''}
+    ${referrer ? `<p class="sub" style="margin-top:4px;">معرف: ${escapeHtml(referrer.name)}</p>` : ''}
+    ${refCount>0 ? `<p class="sub" style="margin-top:4px;">🎁 ${toFa(refCount)} نفر معرفی کرده ${refDiscount>0?`— مستحق ${toFa(refDiscount)}٪ تخفیف`:''}</p>` : ''}${state.offerUsage.filter(u=>u.customerId===c.id&&!u.cancelled).length ? `<p class="sub" style="margin-top:4px;">🏷️ افرهای استفاده‌شده: ${escapeHtml(state.offerUsage.filter(u=>u.customerId===c.id&&!u.cancelled).map(u=>u.title||'افر').join('، '))}</p>` : ''}
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="openCustomerForm('${c.id}')">ویرایش</button>
+      ${c.phone ? `<button class="btn ghost" onclick="window.open('tel:${c.phone}')">تماس</button>` : ''}
+      <button class="btn" onclick="closeModal(true); openAppointmentForm(null,'${c.id}')">وقت جدید</button>
+    </div>
+    ${c.birthDate ? `<button class="btn ghost" style="width:100%; margin-top:8px;" onclick="openBirthdaySms('${c.id}')">🎂 ارسال پیامک تبریک تولد</button>` : ''}
+
+    <label style="margin-top:18px;">خلاصه گزارش مشتری</label>
+    <div class="stat-row">
+      <div class="stat"><div class="num">${toFa(stats.totalVisits)}</div><div class="lbl">تعداد مراجعه</div></div>
+      <div class="stat"><div class="num">${stats.avgGap!==null?toFa(stats.avgGap):'—'}</div><div class="lbl">میانگین فاصله (روز)</div></div>
+      <div class="stat"><div class="num">${days!==null?toFa(days):'—'}</div><div class="lbl">روز از آخرین مراجعه</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="num">${fmtPrice(stats.totalSpend)}</div><div class="lbl">مجموع پرداختی</div></div>
+      <div class="stat"><div class="num">${stats.avgTicket?fmtPrice(stats.avgTicket):'—'}</div><div class="lbl">میانگین هر مراجعه</div></div>
+    </div>
+    ${svcRows ? `<div class="card">${svcRows}</div>` : ''}
+
+    <label>تاریخچه مراجعات</label>
+    <div>
+      ${stats.visits.length===0 ? '<p class="muted" style="padding:10px 0;">هنوز مراجعه‌ای ثبت نشده</p>' :
+        stats.visits.slice().reverse().map((a,idx)=>{
+          const rIdx = stats.visits.length-1-idx;
+          const gap = rIdx>0 ? daysBetween(stats.visits[rIdx-1].date, a.date) : null;
+          return `
+          <div class="list-item">
+            <div>
+              <div class="name" style="font-size:12.5px;">${formatJalaliShort(a.date)} — ${a.time}</div>
+              <div class="sub">${escapeHtml(a.serviceName||'')} ${a.price?'· '+fmtPrice(a.price):''} ${gap!==null?'· فاصله '+toFa(gap)+' روز':''}</div>
+            </div>
+            <span class="badge ${a.status==='done'?'done':'upcoming'}">${a.status==='done'?'انجام‌شد':'در انتظار'}</span>
+          </div>`;
+        }).join('')
+      }
+    </div>
+    <button class="del-x" style="margin-top:10px;" onclick="if(confirm('مشتری و اطلاعاتش حذف شود؟')) deleteCustomer('${c.id}')">حذف مشتری</button>
+  `);
+}
+
+/* ============ Appointment form ============ */
+function serviceChecklistHtml(selected){if(state.services.length===0)return '<p class="muted">اول از تب «خدمات» یه خدمت اضافه کن</p>';return state.services.map(s=>{const old=(selected||[]).find(x=>x.serviceId===s.id)||{},mode=s.pricingMode||'total',q=old.quantity||1;return `<label class="svc-check"><span class="svc-left"><input type="checkbox" class="svcCk" value="${s.id}" data-name="${escapeHtml(s.name)}" data-price="${s.price}" data-mode="${mode}" ${old.serviceId?'checked':''}><span>${escapeHtml(s.name)}</span><span class="svc-mode-badge">${mode==='quantity'?'تعدادی':'کلی'}</span></span><span style="display:flex;align-items:center;gap:6px;">${mode==='quantity'?`<input type="number" class="qty-input svcQty" min="1" value="${q}" ${old.serviceId?'':'disabled'}><span class="svc-price">هر واحد ${fmtPrice(s.price)}</span>`:`<span class="svc-price">${fmtPrice(s.price)}</span>`}</span></label>`}).join('')}
+function recalcApptTotal(){let total=0;document.querySelectorAll('.svcCk:checked').forEach(c=>{const q=c.dataset.mode==='quantity'?Math.max(1,Number(c.closest('.svc-check').querySelector('.svcQty').value)||1):1;total+=Number(c.dataset.price||0)*q});document.getElementById('fPrice').value=roundMoney(total);}
+
+function serviceChecklistHtml(selected){if(state.services.length===0)return '<p class="muted">اول از تب «خدمات» یه خدمت اضافه کن</p>';return state.services.map(s=>{const old=(selected||[]).find(x=>x.serviceId===s.id)||{},mode=s.pricingMode||'total',q=old.quantity||1;return `<label class="svc-check"><span class="svc-left"><input type="checkbox" class="svcCk" value="${s.id}" data-name="${escapeHtml(s.name)}" data-price="${s.price}" data-mode="${mode}" ${old.serviceId?'checked':''}><span>${escapeHtml(s.name)}</span><span class="svc-mode-badge">${mode==='quantity'?'تعدادی':'کلی'}</span></span><span style="display:flex;align-items:center;gap:6px;">${mode==='quantity'?`<input type="number" class="qty-input svcQty" min="1" value="${q}" ${old.serviceId?'':'disabled'}><span class="svc-price">هر واحد ${fmtPrice(s.price)}</span>`:`<span class="svc-price">${fmtPrice(s.price)}</span>`}</span></label>`}).join('')}
+function recalcApptTotal(){let total=0;document.querySelectorAll('.svcCk:checked').forEach(c=>{const q=c.dataset.mode==='quantity'?Math.max(1,Number(c.closest('.svc-check').querySelector('.svcQty').value)||1):1;total+=Number(c.dataset.price||0)*q});total=roundMoney(total);const gross=document.getElementById('fGross');if(gross)gross.value=total;updateDiscountPreview();}
+function updateDiscountPreview(){
+  const gross=roundMoney(Number(document.getElementById('fGross')?.value)||0), pct=Math.max(0,Math.min(100,Number(document.getElementById('fDiscountPct')?.value)||0));
+  const amount=roundMoney(gross*pct/100), final=roundMoney(gross-amount);
+  const da=document.getElementById('fDiscountAmount'), fp=document.getElementById('fPrice');
+  if(da)da.value=amount; if(fp)fp.value=final; updateFinancePreview();
+}
+function openAppointmentForm(id,presetCustomerId){
+ const a=id?state.appointments.find(x=>x.id===id):null,selected=a?(a.services||[]):[],cid=a?a.customerId:(presetCustomerId||''),c=state.customers.find(x=>x.id===cid);
+ const oldGross=a&&a.grossPrice!=null?roundMoney(a.grossPrice):roundMoney(a?.price||selected.reduce((sum,x)=>sum+(Number(x.total||x.price)||0),0));
+ const oldPct=a&&a.discountPercent!=null?Number(a.discountPercent):0;
+ openModal(`<h3>${a?'ویرایش نوبت':'نوبت جدید'}</h3><label>مشتری</label><div class="customer-picker"><input type="hidden" id="fCustomer" value="${cid}"><input id="fCustomerSearch" autocomplete="off" placeholder="نام مشتری را جستجو کن..." value="${c?escapeHtml(c.name):''}"><div id="customerPickerResults" class="customer-picker-results"></div></div><label>خدمات</label><div class="card" id="svcChecklist" style="margin-top:0;">${serviceChecklistHtml(selected)}</div><label>تاریخ</label>${jalaliDateSelectsHtml('fDate',a?a.date:todayIso())}<label>ساعت</label><input type="time" id="fTime" value="${a?a.time:''}"><label>مبلغ خدمات (قبل از تخفیف)</label><input type="number" id="fGross" min="0" value="${oldGross}" readonly><label>تخفیف (%)</label><input type="number" id="fDiscountPct" min="0" max="100" value="${oldPct}" placeholder="مثلاً ۱۰"><label>مبلغ تخفیف</label><input type="number" id="fDiscountAmount" min="0" value="${a&&a.discountAmount!=null?roundMoney(a.discountAmount):0}" readonly><label>مبلغ نهایی (تومان)</label><input type="number" id="fPrice" min="0" value="${a?a.price||'':''}" readonly><div id="salonShareWrap" style="display:${c&&customerType(c)==='salon'?'':'none'}"><label>درصد سهم سالن</label><input type="number" id="fSalonPercent" min="0" max="100" value="${a&&a.salonPercent!=null?a.salonPercent:30}"><div class="appt-finance" id="financePreview"></div></div><div class="modal-actions"><button class="btn ghost" onclick="closeModal()">انصراف</button><button class="btn" onclick="saveAppointment('${a?a.id:''}')">ذخیره</button></div>`);
+ const search=document.getElementById('fCustomerSearch'),res=document.getElementById('customerPickerResults');
+ const show=q=>{q=q.trim().toLocaleLowerCase();const ms=state.customers.filter(x=>!q||x.name.toLocaleLowerCase().includes(q)||String(x.phone||'').includes(q)).slice(0,50);res.innerHTML=ms.length?ms.map(x=>`<div class="customer-option" onclick="selectAppointmentCustomer('${x.id}')"><b>${escapeHtml(x.name)}</b> <span class="customer-owner-badge ${ownerClass(x)}">${ownerLabel(x)}</span>${x.phone?`<div class="sub">${escapeHtml(x.phone)}</div>`:''}</div>`).join(''):'<div class="muted" style="padding:12px">مشتری پیدا نشد</div>';res.classList.add('open')};
+ search.addEventListener('focus',()=>show(search.value));search.addEventListener('input',()=>{document.getElementById('fCustomer').value='';show(search.value)});document.addEventListener('click',function h(e){if(!e.target.closest('.customer-picker'))res.classList.remove('open')},{once:true});
+ const ck=document.getElementById('svcChecklist');ck.addEventListener('change',e=>{if(e.target.classList.contains('svcCk')){const q=e.target.closest('.svc-check').querySelector('.svcQty');if(q)q.disabled=!e.target.checked||e.target.dataset.mode!=='quantity'}recalcApptTotal()});ck.addEventListener('input',recalcApptTotal);document.getElementById('fDiscountPct').addEventListener('input',updateDiscountPreview);const p=document.getElementById('fSalonPercent');if(p)p.addEventListener('input',updateFinancePreview);recalcApptTotal();updateDiscountPreview();
+}
+function selectAppointmentCustomer(id){const c=state.customers.find(x=>x.id===id);if(!c)return;document.getElementById('fCustomer').value=id;document.getElementById('fCustomerSearch').value=c.name;document.getElementById('customerPickerResults').classList.remove('open');const w=document.getElementById('salonShareWrap');if(w)w.style.display=customerType(c)==='salon'?'':'none';if(document.getElementById('fSalonPercent'))document.getElementById('fSalonPercent').value=30;updateFinancePreview();}
+function updateFinancePreview(){const c=state.customers.find(x=>x.id===document.getElementById('fCustomer')?.value),total=roundMoney(Number(document.getElementById('fPrice')?.value)||0),pct=Math.max(0,Math.min(100,Number(document.getElementById('fSalonPercent')?.value)||30)),salon=customerType(c)==='salon'?roundMoney(total*pct/100):0,me=roundMoney(total-salon),el=document.getElementById('financePreview');if(el)el.innerHTML=`<b>تقسیم مبلغ نهایی</b><div class="finance-grid"><div class="finance-box"><div class="v">${fmtPrice(total)}</div><div class="l">مجموع</div></div><div class="finance-box"><div class="v">${fmtPrice(me)}</div><div class="l">سهم من</div></div><div class="finance-box"><div class="v">${fmtPrice(salon)}</div><div class="l">سهم سالن (${toFa(pct)}٪)</div></div></div>`;}
+async function saveAppointment(id){
+ const cid=document.getElementById('fCustomer').value,date=getIsoFromJalaliSelects('fDate'),time=document.getElementById('fTime').value,checked=[...document.querySelectorAll('.svcCk:checked')];if(!cid){showToast('مشتری را انتخاب کن');return}if(!time){showToast('ساعت را وارد کن');return}if(!checked.length){showToast('حداقل یک خدمت رو انتخاب کن');return}
+ const services=checked.map(c=>{const mode=c.dataset.mode||'total',q=mode==='quantity'?Math.max(1,Number(c.closest('.svc-check').querySelector('.svcQty').value)||1):1,unitPrice=Number(c.dataset.price)||0,total=roundMoney(unitPrice*q);return{serviceId:c.value,name:c.dataset.name,price:total,unitPrice,unitMode:mode,quantity:q,total}}),serviceName=services.map(x=>x.unitMode==='quantity'?`${x.name} × ${toFa(x.quantity)}`:x.name).join('، '),grossPrice=roundMoney(Number(document.getElementById('fGross').value)||0),discountPercent=Math.max(0,Math.min(100,Number(document.getElementById('fDiscountPct').value)||0)),discountAmount=roundMoney(grossPrice*discountPercent/100),price=roundMoney(grossPrice-discountAmount),customer=state.customers.find(c=>c.id===cid),conflict=state.appointments.find(x=>x.id!==id&&x.date===date&&x.time===time&&x.status!=='cancelled');if(conflict){showToast('⚠️ در این ساعت یک نوبت دیگر ثبت شده');return}const salonPercent=customerType(customer)==='salon'?Math.max(0,Math.min(100,Number(document.getElementById('fSalonPercent')?.value)||30)):0;if(id)Object.assign(state.appointments.find(x=>x.id===id),{customerId:cid,customerName:customer.name,services,serviceName,date,time,price,grossPrice,discountPercent,discountAmount,salonPercent});else state.appointments.push({id:uid(),customerId:cid,customerName:customer.name,services,serviceName,date,time,price,grossPrice,discountPercent,discountAmount,status:'upcoming',salonPercent});await storageSet('appointments',state.appointments);syncNotifications();closeModal();render();showToast('نوبت ذخیره شد');}
+
+async function openAppointmentActions(id){
+  await markNotificationRead(state.notifications.find(n=>!n.read&&n.type==='appointment'&&n.actionId===id)?.id);
+  const a = state.appointments.find(x=>x.id===id);
+  if(!a) return;
+  const c = state.customers.find(c=>c.id===a.customerId);
+  openModal(`
+    <h3>${c?escapeHtml(c.name):'نوبت'}</h3>
+    <p class="sub" style="margin-top:4px;">${formatJalaliShort(a.date)} — ${a.time} · ${escapeHtml(a.serviceName||'')}</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal(true); openAppointmentForm('${a.id}')">ویرایش</button>
+      <button class="btn" onclick="copyReminder('${a.id}')">پیام یادآوری</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="setApptStatus('${a.id}','done')">انجام‌شد ✓</button>
+      <button class="btn ghost" onclick="setApptStatus('${a.id}','cancelled')">کنسل شد</button>
+    </div>
+    <button class="del-x" style="margin-top:10px;" onclick="deleteAppointment('${a.id}')">حذف نوبت</button>
+  `);
+}
+async function setApptStatus(id, status){
+  const a = state.appointments.find(x=>x.id===id); a.status = status;
+  await storageSet('appointments', state.appointments);
+  closeModal(); render();
+}
+async function deleteAppointment(id){
+  if(!confirm('این نوبت حذف بشه؟')) return;
+  state.appointments = state.appointments.filter(a=>a.id!==id);
+  await storageSet('appointments', state.appointments);
+  closeModal(); render(); showToast('نوبت حذف شد');
+}
+function copyReminder(id){
+  const a = state.appointments.find(x=>x.id===id);
+  if(!a) return;
+  const c = state.customers.find(c=>c.id===a.customerId);
+  const msg = `سلام ${c?c.name:''} عزیز 🌸 یادآوری وقت شما در تاریخ ${formatJalali(a.date)} ساعت ${a.time} برای ${a.serviceName||'خدمت رزرو‌شده'}. منتظر دیدارتون هستیم 💅`;
+  const rawPhone = c && c.phone ? String(c.phone) : '';
+  const phone = rawPhone.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9+]/g,'');
+  if(!phone){
+    showToast('شماره موبایل این مشتری ثبت نشده');
+    return;
+  }
+  // Opens the phone's SMS app with the recipient and reminder text already filled in.
+  window.location.href = `sms:${phone}?body=${encodeURIComponent(msg)}`;
+}
+
+/* ============ Service form ============ */
+function openServiceForm(id){const s=id?state.services.find(x=>x.id===id):null;openModal(`<h3>${s?'ویرایش خدمت':'خدمت جدید'}</h3><label>نام خدمت</label><input id="fSvcName" value="${s?escapeHtml(s.name):''}"><label>نوع قیمت‌گذاری</label><select id="fSvcMode"><option value="total" ${!s||s.pricingMode!=='quantity'?'selected':''}>کلی — یک قیمت برای کل خدمت</option><option value="quantity" ${s&&s.pricingMode==='quantity'?'selected':''}>تعدادی — قیمت × تعداد</option></select><label>قیمت پایه (تومان)</label><input type="number" id="fSvcPrice" value="${s?s.price:''}"><label style="display:flex;align-items:center;gap:7px;font-weight:600;margin-top:12px;"><input type="checkbox" id="fSvcMain" style="width:auto;" ${s&&s.isMain?'checked':''}> این خدمت جزو خدمات اصلی باشد</label><p class="muted" style="margin-top:7px;line-height:1.8;">خدمات اصلی در گزارش مالی ماهانه نمایش داده می‌شوند.</p><div class="modal-actions"><button class="btn ghost" onclick="closeModal()">انصراف</button><button class="btn" onclick="saveService('${s?s.id:''}')">ذخیره</button></div>`);}
+async function saveService(id){const name=document.getElementById('fSvcName').value.trim(),price=Number(document.getElementById('fSvcPrice').value)||0,pricingMode=document.getElementById('fSvcMode').value,isMain=document.getElementById('fSvcMain')?.checked||false;if(!name){showToast('نام خدمت را وارد کن');return}if(id)Object.assign(state.services.find(x=>x.id===id),{name,price,pricingMode,isMain});else state.services.push({id:uid(),name,price,pricingMode,isMain});await storageSet('services',state.services);closeModal();render();showToast('خدمت ذخیره شد');}
+
+async function deleteService(id){
+  if(!confirm('این خدمت حذف بشه؟')) return;
+  state.services = state.services.filter(s=>s.id!==id);
+  await storageSet('services', state.services);
+  render(); showToast('خدمت حذف شد');
+}
+
+/* ============ Offers & referral ============ */
+function openOfferForm(){
+  openModal(`
+    <h3>افر جدید</h3>
+    <label>عنوان</label><input id="fOffTitle" placeholder="مثلاً افر تابستانه">
+    <label>میزان تخفیف (مثلاً ۲۰٪ یا ۵۰,۰۰۰ تومان)</label><input id="fOffDiscount" placeholder="۲۰٪">
+    <label>توضیحات</label><textarea id="fOffDesc" rows="2" placeholder="اختیاری"></textarea>
+    <label>معتبر تا تاریخ</label>${jalaliDateSelectsHtml('fOffDate', todayIso())}
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn" onclick="saveOffer()">ذخیره</button>
+    </div>
+  `);
+}
+async function saveOffer(){
+  const title = document.getElementById('fOffTitle').value.trim();
+  const discount = document.getElementById('fOffDiscount').value.trim();
+  const desc = document.getElementById('fOffDesc').value.trim();
+  const validUntil = getIsoFromJalaliSelects('fOffDate');
+  if(!title || !discount){ showToast('عنوان و میزان تخفیف را وارد کن'); return; }
+  state.offers.push({ id: uid(), title, discount, desc, validUntil });
+  await storageSet('offers', state.offers);
+  closeModal(); render(); showToast('افر اضافه شد');
+}
+async function deleteOffer(id){
+  if(!confirm('این افر حذف بشه؟')) return;
+  state.offers = state.offers.filter(o=>o.id!==id);
+  await storageSet('offers', state.offers);
+  render(); showToast('افر حذف شد');
+}
+function openReferralSettingsForm(){
+  const s = state.referralSettings;
+  openModal(`
+    <h3>تنظیم برنامه معرفی</h3>
+    <label>هر چند نفر معرفی، مشتری تخفیف بگیره؟</label>
+    <input type="number" id="fPerRef" value="${s.perReferrals}" min="1">
+    <label>چند درصد تخفیف؟</label>
+    <input type="number" id="fDiscPct" value="${s.discountPercent}" min="0" max="100">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn" onclick="saveReferralSettings()">ذخیره</button>
+    </div>
+  `);
+}
+async function saveReferralSettings(){
+  const perReferrals = Number(document.getElementById('fPerRef').value) || 1;
+  const discountPercent = Number(document.getElementById('fDiscPct').value) || 0;
+  state.referralSettings = { perReferrals, discountPercent };
+  await storageSet('referralSettings', state.referralSettings);
+  closeModal(); render(); showToast('تنظیمات ذخیره شد');
+}
+
+/* ============ Occasions ============ */
+function openOccasionForm(){
+  openModal(`
+    <h3>مناسبت جدید</h3>
+    <label>عنوان</label>
+    <input id="fOccTitle" placeholder="مثلاً روز آرایشگر">
+    <label>نوع تقویم</label>
+    <select id="fOccType">
+      <option value="jalali">شمسی (تاریخ ثابت هرساله)</option>
+      <option value="gregorian">میلادی (تاریخ ثابت هرساله)</option>
+    </select>
+    <div id="occDateWrap">${monthDaySelectHtml('fOccDate','jalali',1,1)}</div>
+    <label>مرتبط با چه شغلی؟ (اختیاری — برای فیلتر مشتری‌ها، با ویرگول جدا کن)</label>
+    <input id="fOccJob" placeholder="مثلاً پزشک، دکتر">
+    <label>متن اختصاصی پیامک این مناسبت (اختیاری)</label>
+    <textarea id="fOccSms" rows="4" placeholder="{name} عزیز، {occasion} مبارک 🌸"></textarea>
+    <p class="muted" style="margin-top:6px; line-height:1.8;">مناسبت‌های مذهبی و قمری (عید فطر، روز مادر و...) هرسال تاریخشون عوض می‌شه؛ بهتره نزدیک زمانش با تاریخ درست همون سال اضافه کنی.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn" onclick="saveOccasion()">ذخیره</button>
+    </div>
+  `);
+  document.getElementById('fOccType').addEventListener('change', e=>{
+    document.getElementById('occDateWrap').innerHTML = monthDaySelectHtml('fOccDate', e.target.value, 1, 1);
+  });
+}
+async function saveOccasion(){
+  const title = document.getElementById('fOccTitle').value.trim();
+  const type = document.getElementById('fOccType').value;
+  const month = Number(document.getElementById('fOccDate_m').value);
+  const day = Number(document.getElementById('fOccDate_d').value);
+  const jobRaw = document.getElementById('fOccJob').value.trim();
+  const smsTemplate = document.getElementById('fOccSms').value.trim();
+  const jobKeywords = jobRaw ? jobRaw.split('،').join(',').split(',').map(s=>s.trim()).filter(Boolean) : [];
+  if(!title){ showToast('عنوان مناسبت را وارد کن'); return; }
+  state.occasions.push({ id: uid(), title, type, month, day, jobKeywords, smsTemplate, builtin:false });
+  await storageSet('occasions', state.occasions);
+  closeModal(); render(); showToast('مناسبت اضافه شد');
+}
+async function deleteOccasion(id){
+  if(!confirm('این مناسبت حذف بشه؟')) return;
+  state.occasions = state.occasions.filter(o=>o.id!==id);
+  await storageSet('occasions', state.occasions);
+  closeModal(); render(); showToast('حذف شد');
+}
+async function dismissOccasion(id){
+  await markOccasionRead(id);
+  showToast('این مناسبت انجام‌شده علامت خورد');
+}
+async function dismissBirthday(id){
+  await markBirthdayRead(id);
+  showToast('این یادآوری انجام‌شده علامت خورد');
+}
+
+async function openOccasionDetail(id){
+  const o = state.occasions.find(x=>x.id===id);
+  if(!o) return;
+  await markOccasionRead(id);
+  const next = nextOccasionDate(o);
+  const matched = matchedCustomersForOccasion(o);
+  openModal(`
+    <h3>${escapeHtml(o.title)}</h3>
+    <p class="sub" style="margin-top:4px;">${formatJalali(next, true)}</p>
+    ${o.jobKeywords && o.jobKeywords.length ? `<p class="sub" style="margin-top:4px;">مرتبط با شغل: ${escapeHtml(o.jobKeywords.join('، '))}</p>` : ''}
+    <label style="margin-top:16px;">مشتری‌های مرتبط ${matched.length ? '('+toFa(matched.length)+' نفر)' : ''}</label>
+    <div>
+      ${matched.length===0 ? '<p class="muted" style="padding:10px 0;">مشتری مرتبطی بر اساس شغل پیدا نشد</p>' :
+        matched.map(c=>`
+          <div class="list-item">
+            <div class="row"><div class="avatar">${c.name.slice(0,1)}</div><div><div class="name">${escapeHtml(c.name)}</div><div class="sub">${escapeHtml(c.phone||'')}</div></div></div>
+            ${c.phone ? `<button class="btn small ghost" onclick="openOccasionSms('${c.id}','${o.id}')">ارسال پیامک</button>` : `<button class="btn small ghost" onclick="copyOccasionMessage('${c.id}','${o.id}')">کپی پیام</button>`}
+          </div>`).join('')
+      }
+    </div>
+    <div class="modal-actions" style="margin-top:12px;">
+      <button class="btn ghost" onclick="dismissOccasion('${o.id}'); closeModal();">انجام شد ✓</button>
+      <button class="btn ghost" onclick="deleteOccasion('${o.id}')">حذف مناسبت</button>
+    </div>
+  `);
+}
+function applySmsTemplate(template, data){
+  return (template||'').replace(/\{name\}/g, data.name||'')
+    .replace(/\{occasion\}/g, data.occasion||'')
+    .replace(/\{date\}/g, data.date||'');
+}
+function openSmsComposer(phone, message){
+  if(!phone){ showToast('شماره مشتری ثبت نشده'); return; }
+  const uri = `sms:${String(phone).replace(/\s+/g,'')}?body=${encodeURIComponent(message)}`;
+  window.location.href = uri;
+}
+async function openBirthdaySms(id){
+  const c=state.customers.find(x=>x.id===id);
+  if(!c) return;
+  await markBirthdayRead(id);
+  const msg=applySmsTemplate(state.smsTemplates.birthday,{name:c.name});
+  if(c.phone){ openSmsComposer(c.phone,msg); }
+  else {
+    openModal(`<h3>شماره مشتری ثبت نشده</h3><p class="sub" style="line-height:1.9;margin-top:8px;">متن آماده:</p><textarea rows="5">${escapeHtml(msg)}</textarea><div class="modal-actions"><button class="btn ghost" onclick="closeModal()">بستن</button><button class="btn" onclick="copyTextToClipboard(${JSON.stringify(msg).replace(/</g,'\\u003c')})">کپی متن</button></div>`);
+  }
+}
+function openOccasionSms(customerId, occasionId){
+  const c=state.customers.find(x=>x.id===customerId), o=state.occasions.find(x=>x.id===occasionId);
+  if(!c || !o) return;
+  const msg=applySmsTemplate(o.smsTemplate || state.smsTemplates.occasion,{name:c.name,occasion:o.title,date:formatJalaliShort(nextOccasionDate(o))});
+  openSmsComposer(c.phone,msg);
+}
+function copyTextToClipboard(msg){
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(msg).then(()=>showToast('متن کپی شد'));
+  else showToast(msg);
+}
+function copyOccasionMessage(customerId, occasionId){
+  const c = state.customers.find(x=>x.id===customerId), o = state.occasions.find(x=>x.id===occasionId);
+  if(!c || !o) return;
+  const msg=applySmsTemplate(o.smsTemplate || state.smsTemplates.occasion,{name:c.name,occasion:o.title,date:formatJalaliShort(nextOccasionDate(o))});
+  copyTextToClipboard(msg);
+}
+function copyBirthdayMessage(id){ openBirthdaySms(id); }
+
+function openSmsSettingsForm(){
+  openModal(`
+    <h3>متن آماده پیامک‌ها</h3>
+    <p class="muted" style="line-height:1.8;margin-bottom:8px;">می‌تونی از <b>{name}</b> برای نام مشتری، <b>{occasion}</b> برای نام مناسبت و <b>{date}</b> برای تاریخ استفاده کنی.</p>
+    <label>متن تبریک تولد</label>
+    <textarea id="fBirthdayTpl" rows="5">${escapeHtml(state.smsTemplates.birthday)}</textarea>
+    <label>متن پیش‌فرض مناسبت‌ها</label>
+    <textarea id="fOccasionTpl" rows="5">${escapeHtml(state.smsTemplates.occasion)}</textarea>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn" onclick="saveSmsSettings()">ذخیره</button>
+    </div>
+  `);
+}
+async function saveSmsSettings(){
+  state.smsTemplates.birthday=document.getElementById('fBirthdayTpl').value.trim() || state.smsTemplates.birthday;
+  state.smsTemplates.occasion=document.getElementById('fOccasionTpl').value.trim() || state.smsTemplates.occasion;
+  await storageSet('smsTemplates',state.smsTemplates);
+  closeModal(); render(); showToast('متن پیامک‌ها ذخیره شد');
+}
+
+/* ============ Materials ============ */
+function openMaterialForm(){
+  const existingNames = [...new Set(state.materials.map(m=>m.name))];
+  openModal(`
+    <h3>ثبت خرید مواد اولیه</h3>
+    <label>نام ماده</label>
+    <input id="fMatName" list="matNames" placeholder="مثلاً پودر آکریلیک">
+    <datalist id="matNames">${existingNames.map(n=>`<option value="${escapeHtml(n)}">`).join('')}</datalist>
+    <label>قیمت خرید (تومان)</label>
+    <input type="number" id="fMatPrice" min="0" placeholder="مبلغ">
+    <label>تاریخ خرید</label>
+    ${jalaliDateSelectsHtml('fMatDate', todayIso())}
+    <label>این خرید برای چند مشتری کافیه؟ (اختیاری)</label>
+    <input type="number" id="fMatCustomers" min="1" placeholder="مثلاً ۱۵">
+    <p class="muted" style="margin-top:6px;">برای محاسبه قیمت تمام‌شده مواد به ازای هر مشتری، این مقدار رو وارد کن.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn" onclick="saveMaterial()">ذخیره</button>
+    </div>
+  `);
+}
+async function saveMaterial(){
+  const name = document.getElementById('fMatName').value.trim();
+  const price = Number(document.getElementById('fMatPrice').value) || 0;
+  const date = getIsoFromJalaliSelects('fMatDate');
+  const customersServedRaw = document.getElementById('fMatCustomers').value;
+  const customersServed = customersServedRaw ? Number(customersServedRaw) : null;
+  if(!name || !price){ showToast('نام ماده و قیمت را وارد کن'); return; }
+  state.materials.push({ id: uid(), name, price, date, customersServed });
+  await storageSet('materials', state.materials);
+  closeModal(); render(); showToast('خرید ثبت شد');
+}
+async function deleteMaterial(id){
+  if(!confirm('این خرید حذف بشه؟')) return;
+  state.materials = state.materials.filter(m=>m.id!==id);
+  await storageSet('materials', state.materials);
+  render(); showToast('حذف شد');
+}
+
+/* ============ Expenses / financial report ============ */
+function openExpenseForm(){
+  openModal(`
+    <h3>ثبت هزینه (اجاره، ابزار و ...)</h3>
+    <label>عنوان</label><input id="fExpTitle" placeholder="مثلاً اجاره مغازه شهریور">
+    <label>دسته‌بندی</label>
+    <select id="fExpCat">
+      <option value="rent">اجاره</option>
+      <option value="tools">ابزار</option>
+      <option value="other">سایر</option>
+    </select>
+    <label>مبلغ (تومان)</label><input type="number" id="fExpAmount" min="0" placeholder="مبلغ">
+    <label>تاریخ</label>${jalaliDateSelectsHtml('fExpDate', todayIso())}
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn" onclick="saveExpense()">ذخیره</button>
+    </div>
+  `);
+}
+async function saveExpense(){
+  const title = document.getElementById('fExpTitle').value.trim();
+  const category = document.getElementById('fExpCat').value;
+  const amount = Number(document.getElementById('fExpAmount').value) || 0;
+  const date = getIsoFromJalaliSelects('fExpDate');
+  if(!title || !amount){ showToast('عنوان و مبلغ را وارد کن'); return; }
+  state.expenses.push({ id: uid(), title, category, amount, date });
+  await storageSet('expenses', state.expenses);
+  closeModal(); render(); showToast('هزینه ثبت شد');
+}
+async function deleteExpense(id){
+  if(!confirm('این هزینه حذف بشه؟')) return;
+  state.expenses = state.expenses.filter(e=>e.id!==id);
+  await storageSet('expenses', state.expenses);
+  render(); showToast('حذف شد');
+}
+
+document.getElementById('globalBackupFileInput').addEventListener('change', function(){ handleBackupFile(this); });
+
+(function setupSwipeNavigation(){
+  // Swipe intentionally uses the stable, delayed transition instead of live dragging.
+  // It starts from ANYWHERE in the app, including buttons, inputs and the middle of the page.
+  // Direction: drag right => previous tab, drag left => next tab. Navigation is circular.
+  const tabs=['home','customers','appointments','calendar','more'];
+  const phone=document.querySelector('.phone'); if(!phone)return;
+  let sx=0,sy=0,st=0,tracking=false,preventClickUntil=0;
+  const currentIndex=()=>{const i=tabs.indexOf(state.tab);return i>=0?i:4;};
+  const reset=()=>{sx=sy=st=0;tracking=false;};
+  phone.style.touchAction='pan-y';
+  phone.addEventListener('touchstart',e=>{
+    if(tabAnimating||e.touches.length!==1)return;
+    const t=e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); tracking=true;
+  },{passive:true});
+  phone.addEventListener('touchend',e=>{
+    if(!tracking||tabAnimating||!e.changedTouches.length){reset();return;}
+    const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy,duration=Date.now()-st;
+    reset();
+    if(duration>900 || Math.abs(dx)<55 || Math.abs(dx)<Math.abs(dy)*1.15)return;
+    const i=currentIndex();
+    // Right drag = previous/left tab; left drag = next/right tab.
+    // The bottom navigation is RTL: visually, a left swipe goes to the tab on the right.
+    // Example: Calendar -> Appointments when swiping right-to-left.
+    const j=(i+(dx<0?-1:1)+tabs.length)%tabs.length;
+    preventClickUntil=Date.now()+420;
+    setTab(tabs[j],{swipeDx:dx});
+  },{passive:true});
+  phone.addEventListener('touchcancel',reset,{passive:true});
+  phone.addEventListener('click',e=>{
+    if(Date.now()<preventClickUntil){e.preventDefault();e.stopPropagation();}
+  },true);
+})();
+
+/* ============ Init ============ */
+(async function init(){
+  try{
+    await loadAll();
+    const lastTab = await storageGet('lastTab');
+    if(lastTab && VALID_TABS.includes(lastTab)) state.tab = lastTab;
+    history.replaceState({nailapp:true,tab:state.tab},'',location.href);
+    history.pushState({nailapp:true,tab:state.tab},'',location.href);
+    window.addEventListener('popstate',e=>{
+      if(modalHistoryOpen){
+        handlingPopState=true;
+        modalHistoryOpen=false;
+        closeModal(true);
+        handlingPopState=false;
+        return;
+      }
+      if(e.state && e.state.nailapp){
+        handlingPopState=true;
+        state.tab=e.state.tab||'home';
+        render();
+        handlingPopState=false;
+      } else {
+        history.pushState({nailapp:true,tab:state.tab},'',location.href);
+      }
+    });
+    // render خودش اعلان‌ها را همگام می‌کند؛ رندر دوم و sync تکراری حذف شد.
+    render();
+    updateNotificationButton();
+  }catch(err){
+    console.error('NailApp initialization failed:', err);
+    state.loaded=false;
+    const main=document.getElementById('main');
+    if(main) main.innerHTML='<div class="loading">خطا در بارگذاری اطلاعات.<br><button class="btn" style="margin-top:12px" onclick="location.reload()">تلاش دوباره</button></div>';
+  }
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.error('PWA service worker registration failed:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
